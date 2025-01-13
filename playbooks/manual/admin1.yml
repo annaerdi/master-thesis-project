@@ -1,0 +1,110 @@
+# for zm to be reachable, have a terminal open and run:
+# ssh -D 9999 aecid@<mgmt_ip>
+# and have this line in the browserexecutor.py:
+# browser = playwright.chromium.launch(headless=False, proxy={"server":"socks5://localhost:9999"})
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://172.17.100.121/zm"
+    creates_session: "user_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: "admin"
+    session: "user_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: "zm_VERY_S3CURE_PASSW0RD"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: ".btn"
+    session: "user_session"
+
+  # Accept the ZoneMinder Privacy note
+  # TODO: this is only given after the first login + every time in incognito mode -> provide conditional
+#  - type: browser
+#    cmd: click
+#    selector: "button[type='submit'][value='Apply']"
+#    session: "user_session"
+
+  # click on options in the nav bar
+  - type: browser
+    cmd: click
+    selector: "a.nav-link[href='?view=options']"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Config"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Network"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Montage Review"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "#liveButton"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "#allof"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Console"
+    session: "user_session"
+
+  # Click on cam-1
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=watch&mid=1']"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Log"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "#refreshBtn"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Filters"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Montage"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "user_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[name='action'][value='logout']"
+    session: "user_session"
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "user_session.png"
+    session: "user_session"
