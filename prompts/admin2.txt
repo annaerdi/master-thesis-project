@@ -1,0 +1,3 @@
+Picture a laidback admin who logs into ZoneMinder, then shifts their focus to browsing the web in a separate
+browser session. They perform the minimum tasks required to log in and briefly check the system, but their
+attention quickly drifts to unrelated searches and casual surfing. Give me a playbook for this behavior.

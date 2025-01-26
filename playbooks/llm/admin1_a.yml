@@ -1,0 +1,73 @@
+# ZoneMinder Monitoring Playbook
+vars:
+  ZM_URL: "http://172.17.100.121"
+  ZM_USERNAME: "admin"
+  ZM_PASSWORD: "zm_VERY_S3CURE_PASSW0RD"
+
+commands:
+  # Visit ZoneMinder login page
+  - type: browser
+    cmd: visit
+    url: $ZM_URL
+    creates_session: "zm_admin_session"
+
+  # Log in as administrator
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: $ZM_USERNAME
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: $ZM_PASSWORD
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: ".btn"
+    session: "zm_admin_session"
+
+  # Navigate to different sections
+  - type: browser
+    cmd: click
+    selector: "a.nav-link[href='?view=options']"
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Config"
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Network"
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "text=Montage Review"
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "#liveButton"
+    session: "zm_admin_session"
+
+  # Take a screenshot for documentation
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "zm_admin_session_screenshot.png"
+    session: "zm_admin_session"
+
+  # Log out of ZoneMinder
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "zm_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[name='action'][value='logout']"
+    session: "zm_admin_session"

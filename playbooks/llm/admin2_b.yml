@@ -1,0 +1,80 @@
+# File: laidback_admin.yml
+vars:
+  ZM_URL: "http://172.17.100.121"  # Replace with your ZoneMinder URL
+  USERNAME: "admin"
+  PASSWORD: "zm_VERY_S3CURE_PASSW0RD"
+  SCREENSHOT_PATH: "lazy_admin_snapshot.png"
+  CASUAL_SEARCH: "latest cat videos"
+
+commands:
+  # Step 1: Log into ZoneMinder
+  - type: browser
+    cmd: visit
+    url: $ZM_URL
+    creates_session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: $USERNAME
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: $PASSWORD
+    session: "zm_session"
+
+  - type: browser
+    cmd: click
+    selector: ".btn"
+    session: "zm_session"
+
+  # Step 2: Perform a quick system check
+  - type: browser
+    cmd: click
+    selector: "a.nav-link[href='?view=console']"
+    session: "zm_session"
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: $SCREENSHOT_PATH
+    session: "zm_session"
+
+  # Step 3: Shift focus to casual web browsing
+  - type: browser
+    cmd: visit
+    url: "https://www.google.com"
+    creates_session: "casual_browsing"
+
+  - type: browser
+    cmd: type
+    selector: "textarea[name='q']"
+    text: $CASUAL_SEARCH
+    session: "casual_browsing"
+
+  - type: browser
+    cmd: click
+    selector: "input[name='btnK']"
+    session: "casual_browsing"
+
+  - type: browser
+    cmd: click
+    selector: "text=Videos"
+    session: "casual_browsing"
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "casual_browsing.png"
+    session: "casual_browsing"
+
+  # Step 4: Logout of ZoneMinder
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "zm_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[name='action'][value='logout']"
+    session: "zm_session"

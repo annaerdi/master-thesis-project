@@ -1,0 +1,72 @@
+# ZoneMinder Playbook for a Lazy Admin
+# Simulates a relaxed admin who logs into ZoneMinder and browses the web in another session
+vars:
+  ZM_URL: "http://172.17.100.121"  # ZoneMinder base URL
+  ZM_USERNAME: "admin"             # Admin username
+  ZM_PASSWORD: "zm_VERY_S3CURE_PASSW0RD"      # Admin password
+
+commands:
+  # Step 1: Visit ZoneMinder login page
+  - type: browser
+    cmd: visit
+    url: $ZM_URL
+    creates_session: "zm_lazy_admin_session"
+
+  # Step 2: Login to ZoneMinder
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: $ZM_USERNAME
+    session: "zm_lazy_admin_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: $ZM_PASSWORD
+    session: "zm_lazy_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: ".btn"
+    session: "zm_lazy_admin_session"
+
+  # Step 3: Pretend to check ZoneMinder briefly
+  - type: browser
+    cmd: click
+    selector: "a.nav-link[href='?view=console']"  # Open console page
+    session: "zm_lazy_admin_session"
+
+  # Step 4: Open a second browser session to browse the web
+  - type: browser
+    cmd: visit
+    url: "https://www.google.com"
+    creates_session: "web_browsing_session"
+
+  # Step 5: Search for something interesting
+  - type: browser
+    cmd: type
+    selector: "textarea[name='q']"
+    text: "funny cat videos"
+    session: "web_browsing_session"
+
+  - type: browser
+    cmd: click
+    selector: "input[name='btnK']"  # Google search button
+    session: "web_browsing_session"
+
+  # Step 6: Take a screenshot of the search results to prove activity
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "web_browsing_screenshot.png"
+    session: "web_browsing_session"
+
+  # Step 7: (Optional) Switch back to ZoneMinder and log out
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "zm_lazy_admin_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[name='action'][value='logout']"
+    session: "zm_lazy_admin_session"

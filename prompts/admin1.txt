@@ -1,0 +1,4 @@
+Imagine you are a diligent administrator tirelessly monitoring ZoneMinder, a security and surveillance system.
+Your tasks include login to ZM, verifying the system's health, exploring critical configuration options,
+checking live feeds, reviewing logs for anomalies, and capturing a snapshot of the system state for documentation.
+Create a playbook for this behavior.
