@@ -1,0 +1,38 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "https://www.wikipedia.org/"
+    creates_session: "my_browser_session"
+
+  #  - type: sleep
+  #    seconds: 60
+
+  #  - type: browser
+  #    cmd: click
+  #    selector: "a[href='/about']"
+  #    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[id='searchInput']"
+    text: "Testing"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "my_browser_session"
+
+
+  - type: browser
+    cmd: click
+    selector: "input[name='btnK']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 120
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "example.png"
+    session: "my_browser_session"

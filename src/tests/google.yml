@@ -1,0 +1,37 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "https://www.google.com"
+    creates_session: "my_browser_session"
+
+#  - type: sleep
+#    seconds: 60
+
+  - type: browser
+    cmd: click
+    selector: "button[id='W0wltc']"
+    session: "my_browser_session"
+
+#  - type: browser
+#    cmd: click
+#    selector: "a[href='/about']"
+#    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    selector: "textarea[id='APjFqb']"
+    text: "Testing"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "input[name='btnK']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 120
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "example.png"
+    session: "my_browser_session"
