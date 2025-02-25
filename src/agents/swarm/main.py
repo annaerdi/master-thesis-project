@@ -1,3 +1,4 @@
+from playwright.sync_api import sync_playwright
 from swarm import Swarm, Agent
 from dotenv import load_dotenv
 import json
@@ -25,26 +26,67 @@ def instructions(context_variables: dict = None) -> str:
     return system_message.replace("{user_name}", user_name)
 
 
-def get_dom(query: str = "") -> str:
+def get_clickable_elements(url: str = "") -> str:
     """
-    Placeholder function returning a dummy DOM snippet.
-    In real usage, you'd integrate with Playwright or another browser-automation library.
+    Uses Playwright to load the provided URL and extract clickable and typable elements.
+    This function returns a JSON string with two keys:
+      - 'clickable': elements like <a> and <button>
+      - 'typable': input fields and textareas
     """
-    dummy_dom = {
-        "body": {
-            "divs": [
-                {"id": "main", "buttons": [{"id": "W0wltc", "text": "I agree"}]},
-                {"id": "footer", "links": ["Contact", "Privacy"]},
-            ]
-        }
-    }
-    return json.dumps(dummy_dom, indent=2)
+    elements_info = {"clickable": [], "typable": []}
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="networkidle")
+
+            # Extract clickable elements (links and buttons)
+            clickable_selectors = "a, button"
+            clickable_elements = page.query_selector_all(clickable_selectors)
+            for el in clickable_elements:
+                try:
+                    tag = el.evaluate("el => el.tagName")
+                    text = el.inner_text().strip()
+                    el_id = el.get_attribute("id")
+                    aria_label = el.get_attribute("aria-label")
+                    elements_info["clickable"].append({
+                        "tag": tag,
+                        "id": el_id,
+                        "aria-label": aria_label,
+                        "text": text
+                    })
+                except Exception:
+                    continue
+
+            # Extract typable elements (text inputs, textareas)
+            typable_selectors = "input[type='text'], textarea, input:not([type])"
+            typable_elements = page.query_selector_all(typable_selectors)
+            for el in typable_elements:
+                try:
+                    tag = el.evaluate("el => el.tagName")
+                    placeholder = el.get_attribute("placeholder")
+                    el_id = el.get_attribute("id")
+                    elements_info["typable"].append({
+                        "tag": tag,
+                        "id": el_id,
+                        "placeholder": placeholder
+                    })
+                except Exception:
+                    continue
+            browser.close()
+    except Exception as e:
+        # In case of errors (bad URL, network issues, etc.), return error info.
+        return json.dumps({"error": str(e)}, indent=2)
+    print(json.dumps(elements_info, indent=2))
+    return json.dumps(elements_info, indent=2)
+
 
 # Create a single Agent with a dynamic instructions function, plus the get_dom tool:
 playbook_agent = Agent(
     name="Playbook Agent",
-    instructions=instructions,  # Could also be a static string
-    functions=[get_dom],
+    instructions=instructions,
+    functions=[get_clickable_elements],
 )
 
 if __name__ == "__main__":
@@ -53,7 +95,7 @@ if __name__ == "__main__":
 
     # Starting conversation
     messages = []
-
+    print("Enter your commands for generating a playbook. To exit, type 'exit' or 'quit'.")
     while True:
         user_input = input("User: ")
         if user_input.lower() in ("exit", "quit"):
