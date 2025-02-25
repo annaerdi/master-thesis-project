@@ -7,12 +7,12 @@ load_dotenv()
 client = Swarm()
 
 
-
-def instructions(context_variables: dict) -> str:
+def instructions(context_variables: dict = None) -> str:
     """
     This function returns the 'system' instructions for the agent.
     It reads the instructions from a system_message.txt file located one folder up.
     """
+    context_variables = context_variables or {}  # it's a dictionary if None
     user_name = context_variables.get("user_name", "User")
     file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "system_message.txt")
 
@@ -49,7 +49,8 @@ playbook_agent = Agent(
 
 if __name__ == "__main__":
     # Example "context variables" used by instructions()
-    context_variables = {"user_name": "James"}
+    # context_variables = {"user_name": "James"}
+
     # Starting conversation
     messages = []
 
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         response = client.run(
             agent=playbook_agent,
             messages=messages,
-            context_variables=context_variables
+            #context_variables=context_variables
         )
 
         # The updated conversation with the agent's response
