@@ -1,0 +1,45 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "https://www.wikipedia.org/"
+    creates_session: "wiki_session"
+    # Starting a new browser session to visit Wikipedia
+
+  - type: browser
+    cmd: type
+    selector: "input[id='searchInput']"
+    text: "Computer Science"
+    session: "wiki_session"
+    # Typing 'Computer Science' in the search bar
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "wiki_session"
+    # Clicking the search button
+
+  - type: sleep
+    seconds: 60
+    # Wait for a minute to allow the page to load completely
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "computer_science_page.png"
+    session: "wiki_session"
+    # Taking a screenshot of the Computer Science page
+
+  - type: browser
+    cmd: click
+    selector: "a[title='Data structure']"
+    session: "wiki_session"
+    # Clicking on the 'Data Structures' link on the Computer Science page
+
+  - type: sleep
+    seconds: 30
+    # Wait for half a minute to ensure the Data Structures page is loaded
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "data_structures_page.png"
+    session: "wiki_session"
+    # Taking a screenshot of the Data Structures page
