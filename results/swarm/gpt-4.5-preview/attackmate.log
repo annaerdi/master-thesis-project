@@ -1,0 +1,8 @@
+2025-02-28 13:50:11 INFO - Executing Browser Command: visit https://www.wikipedia.org/
+2025-02-28 13:50:16 INFO - Executing Browser Command: type input[id='searchInput']
+2025-02-28 13:50:18 INFO - Executing Browser Command: click button[type='submit']
+2025-02-28 13:50:21 INFO - Executing Browser Command: screenshot
+2025-02-28 13:50:23 INFO - Sleeping 3 seconds
+2025-02-28 13:50:26 INFO - Executing Browser Command: click a[href='/wiki/Physics']
+2025-02-28 13:50:28 INFO - Sleeping 4 seconds
+2025-02-28 13:50:32 INFO - Executing Browser Command: screenshot

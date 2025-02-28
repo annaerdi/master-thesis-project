@@ -1,0 +1,45 @@
+commands:
+  # Visiting Wikipedia homepage and creating new session
+  - type: browser
+    cmd: visit
+    url: "https://www.wikipedia.org/"
+    creates_session: "science_session"
+
+  # Typing 'Science' into the search bar
+  - type: browser
+    cmd: type
+    selector: "input[id='searchInput']"
+    text: "Science"
+    session: "science_session"
+
+  # Clicking search submit button
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "science_session"
+
+  # Taking a screenshot of the science article for future reference
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "science_article.png"
+    session: "science_session"
+
+  # Waiting a bit to simulate reading time
+  - type: sleep
+    seconds: 30
+
+  # Clicking to explore linked topic "Physics"
+  - type: browser
+    cmd: click
+    selector: "a[href='/wiki/Physics']"
+    session: "science_session"
+
+  # Waiting to simulate more reading
+  - type: sleep
+    seconds: 40
+
+  # Taking another screenshot of the physics article
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "physics_article.png"
+    session: "science_session"

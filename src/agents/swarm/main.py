@@ -85,6 +85,7 @@ def get_clickable_elements(url: str = "") -> str:
 # Create a single Agent with a dynamic instructions function, plus the get_dom tool:
 playbook_agent = Agent(
     name="Playbook Agent",
+    model="gpt-4.5-preview-2025-02-27",
     instructions=instructions,
     functions=[get_clickable_elements],
 )
