@@ -1,4 +1,5 @@
 from function_to_schema import function_to_schema
+from system_message import SYSTEM_MESSAGE
 from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -156,14 +157,6 @@ def do_browser_action(step_dict):
 # Chat Orchestration
 # -------------------------------------------------------------------------------------
 
-# Example system message: instruct the AI to produce single-step Attackmate “browser” commands.
-system_message = (
-    "You are simulating a user who browses the web. "
-    "You can produce YAML-based Attackmate commands (one step at a time). "
-    "After each step, call get_dom to see what's on the new page. "
-    "Stop producing steps if you have reached the goal. "
-)
-
 # Our tools for the agent to call:
 tools = [get_dom, add_playbook_step]
 
@@ -232,7 +225,7 @@ def main():
 
         messages.append({"role": "user", "content": user_input})
 
-        new_messages = run_full_turn(system_message, tools, messages)
+        new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
         messages.extend(new_messages)
 
         # At the end of each turn, if you want to see the entire playbook so far:
