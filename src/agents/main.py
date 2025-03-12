@@ -98,8 +98,17 @@ class PlaybookState:
 # Global “playbook” so we can accumulate steps:
 playbook_state = PlaybookState()
 
+def add_sleep_playbook_step(seconds: int) -> str:
+    """Add a 'sleep' step to the YAML playbook"""
+    step = {
+        "type": "sleep",
+        "seconds": seconds
+    }
+    playbook_state.add_step(step)
+    return f"Added sleep step to the playbook:\n{yaml.dump(step, sort_keys=False)}"
 
-def add_playbook_step(
+
+def add_browser_playbook_step(
         step_type: str,
         cmd: str,
         url: Optional[str] = None,
@@ -198,7 +207,7 @@ def do_browser_action(step_dict):
 # -------------------------------------------------------------------------------------
 
 # Our tools for the agent to call:
-tools = [get_interactive_elements, add_playbook_step]
+tools = [get_interactive_elements, add_browser_playbook_step, add_sleep_playbook_step]
 
 def execute_tool_call(tool_call, tools_map):
     """Given a tool call from the model, run the corresponding Python function with provided arguments."""
@@ -224,7 +233,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # or another model
+            model="gpt-4o-mini",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
@@ -255,21 +264,19 @@ def run_full_turn(system_message, tools, messages):
 
 def main():
     messages = []
-
     while True:
-        user_input = input("User: ")
-        if not user_input.strip():
-            print("Exiting...")
+        try:
+            user_input = input("User: ")
+            if not user_input.strip():
+                print("Exiting...")
+                break
+            messages.append({"role": "user", "content": user_input})
+            new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
+            messages.extend(new_messages)
+            #print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
+        except KeyboardInterrupt:
+            print("\nExiting...")
             break
-
-        messages.append({"role": "user", "content": user_input})
-
-        new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
-        messages.extend(new_messages)
-
-        # At the end of each turn, if you want to see the entire playbook so far:
-        print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
-
 
 if __name__ == "__main__":
     main()
