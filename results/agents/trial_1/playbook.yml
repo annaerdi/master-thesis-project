@@ -1,0 +1,113 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+  
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: "admin"
+    session: "zone_minder_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: "DkXRUlrRe01xpFF43yZZ"
+    session: "zone_minder_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "a#getNavBrandHTML"
+    session: "zone_minder_session"
+  
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getOptionsHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getGroupsHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getFilterHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getCycleHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getMontageReviewHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getRprtEvntAuditHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "zone_minder_overview.png"
+    session: "zone_minder_session"

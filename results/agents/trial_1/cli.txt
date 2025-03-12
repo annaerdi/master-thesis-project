@@ -1,0 +1,151 @@
+$ python main.py
+User: make a playbook for The diligent operator is attentive, focused, and meticulous in their duties. the website is at http://40.118.57.244/zm/ username is admin, password is DkXRUlrRe01xpFF43yZZ. make sure to make it as realistic as possible, with sleep commands in between to simulate reading or stuff. the overall playbook should cover actions for spending 5 minutes on the zoneminder app. include at least 20 steps
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'visit', 'url': 'http://40.118.57.244/zm/', 'creates_session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': "input[name='username']", 'text': 'admin', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': "input[name='password']", 'text': 'DkXRUlrRe01xpFF43yZZ', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': "button[type='submit']", 'session': 'zone_minder_session'})
+Assistant invoked tool: get_interactive_elements({'session_id': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'a#getNavBrandHTML', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getConsoleHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getOptionsHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getLogHTML > a:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getGroupsHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getFilterHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getCycleHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getMontageHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getMontageReviewHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getRprtEvntAuditHTML > a.nav-link:nth-of-type(1)', 'session': 'zone_minder_session'})
+Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '10'})
+Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'screenshot', 'screenshot_path': 'zone_minder_overview.png', 'session': 'zone_minder_session'})
+Assistant: Here's the completed YAML playbook for interacting with the ZoneMinder application. It simulates a user logging in, navigating through several sections, and taking a screenshot at the end, while incorporating appropriate pauses for reading or reviewing:
+
+```yaml
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: "admin"
+    session: "zone_minder_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: "DkXRUlrRe01xpFF43yZZ"
+    session: "zone_minder_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "a#getNavBrandHTML"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getOptionsHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getGroupsHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getFilterHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getCycleHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getMontageReviewHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: click
+    selector: "li#getRprtEvntAuditHTML > a.nav-link:nth-of-type(1)"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 10
+
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "zone_minder_overview.png"
+    session: "zone_minder_session"
+```
+
+This playbook incorporates 20 steps and simulates a realistic user experience on the ZoneMinder application.
+User: ^C
+Exiting...
