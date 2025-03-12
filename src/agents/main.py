@@ -1,4 +1,6 @@
+from playwright.sync_api import sync_playwright, Page, ElementHandle
 from function_to_schema import function_to_schema
+from system_message import SYSTEM_MESSAGE
 from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -14,23 +16,71 @@ client = OpenAI()
 # -------------------------------------------------------------------------------------
 # Playwright/DOM handling
 # -------------------------------------------------------------------------------------
-from playwright.sync_api import sync_playwright
 
-# We'll store active browser sessions in a dictionary so each "session_id" can track a page/browser.
+# store active browser sessions in a dictionary so each "session_id" can track a page/browser.
 browser_sessions = {}
 
-def get_dom(session_id: str) -> str:
+def build_naive_css_selector(element: ElementHandle) -> str:
+    return element.evaluate("""
+        (el) => {
+            function getSelector(node) {
+                if (!node || node.nodeType !== Node.ELEMENT_NODE) return '';
+                let selector = node.tagName.toLowerCase();
+                if (node.id) {
+                    selector += '#' + node.id;
+                    return selector;
+                }
+                if (node.className) {
+                    const className = node.className.trim().split(' ')[0];
+                    if (className) selector += '.' + className;
+                }
+                const parent = node.parentElement;
+                if (!parent) return selector;
+                let index = 1;
+                let sibling = node.previousElementSibling;
+                while (sibling) {
+                    if (sibling.tagName === node.tagName) index += 1;
+                    sibling = sibling.previousElementSibling;
+                }
+                selector += ':nth-of-type(' + index + ')';
+                return getSelector(parent) + ' > ' + selector;
+            }
+            return getSelector(el);
+        }
+    """)
+
+
+def get_interactive_elements(session_id: str, output_file: str = "elements.json") -> str:
     """
-    Retrieve the DOM (HTML) for the current page in the given session.
-    If session does not exist yet, create it and return an empty string or some default.
+    Collect interactive elements from current page, save to JSON file, and return results.
+    Returns JSON string of elements or error message if session doesn't exist.
     """
     if session_id not in browser_sessions:
-        # If no session yet, we create a new browser/page, but haven't navigated anywhere yet
-        # so there's no "real" DOM yet. decide later how to handle a blank session.
-        return "No active page. Please visit a URL first."
+        return "No active session. Create one with 'visit' command first."
 
     page = browser_sessions[session_id]
-    return page.content()
+    try:
+        elements = page.query_selector_all("a, button, input, textarea, select")
+        interactive_elements = []
+
+        for idx, elem in enumerate(elements, start=1):
+            css_selector = build_naive_css_selector(elem)
+            interactive_elements.append({
+                "index": idx,
+                "selector": f"css={css_selector}",
+                "tag": elem.evaluate("el => el.tagName"),
+                "text": elem.inner_text().strip(),
+                "type": elem.get_attribute("type"),
+                "id": elem.get_attribute("id"),
+                "class": elem.get_attribute("class")
+            })
+
+        with open(output_file, "w") as f:
+            json.dump(interactive_elements, f, indent=2)
+
+        return json.dumps(interactive_elements, indent=2)
+    except Exception as e:
+        return f"Error collecting elements: {str(e)}"
 
 
 class PlaybookState:
@@ -51,7 +101,8 @@ playbook_state = PlaybookState()
 
 def add_playbook_step(
         step_type: str,
-        cmd: str,
+        seconds: Optional[int] = None,
+        cmd: Optional[str] = None,
         url: Optional[str] = None,
         selector: Optional[str] = None,
         text: Optional[str] = None,
@@ -60,19 +111,38 @@ def add_playbook_step(
         screenshot_path: Optional[str] = None
 ) -> str:
     """
-    Add a single step to our Attackmate-style YAML playbook.
+    Add a step to the YAML playbook.
 
-    The arguments roughly map to:
+    For a sleep step:
+      - Set step_type to "sleep"
+      - Provide the 'seconds' parameter
 
-    - step_type: "browser" typically
-    - cmd: "visit", "click", "type", "screenshot", ...
-    - url: e.g. "https://www.example.com"
-    - selector: e.g. "a[href='/about']"
-    - text: text to type (if cmd=="type")
-    - session: session name for an existing browser context
-    - creates_session: session name if the step is creating a new session
-    - screenshot_path: file name for a screenshot
+    For a browser action step:
+      - step_type is typically "browser"
+      - cmd: the action to perform (e.g. "visit", "click", "type", "screenshot", ...)
+      - url: e.g. "https://www.example.com"
+      - selector: e.g. "a[href='/about']"
+      - text: text to type (if cmd=="type")
+      - session: existing browser session name
+      - creates_session: session name if the step creates a new browser context
+      - screenshot_path: file name to save the screenshot
+
+    The function adds the step to the playbook and, if it's a browser step, executes the browser action.
     """
+    if step_type == "sleep":
+        if seconds is None:
+            raise ValueError("The 'seconds' parameter must be provided for a sleep step.")
+        step = {
+            "type": "sleep",
+            "seconds": seconds
+        }
+        playbook_state.add_step(step)
+        return f"Added sleep step to the playbook:\n{yaml.dump(step, sort_keys=False)}"
+
+    # For non-sleep steps (browser actions)
+    if cmd is None:
+        raise ValueError("The 'cmd' parameter must be provided for a browser step.")
+
     step = {
         "type": step_type,
         "cmd": cmd,
@@ -90,26 +160,19 @@ def add_playbook_step(
     if screenshot_path is not None:
         step["screenshot_path"] = screenshot_path
 
-    # Save the step
     playbook_state.add_step(step)
-
-    # Also perform the step in real time with Playwright (so the DOM changes are real).
     do_browser_action(step)
-
     return f"Added step to the playbook:\n{yaml.dump(step, sort_keys=False)}"
 
 
 def do_browser_action(step_dict):
     """
-    Actually perform the step using Playwright so we keep a real DOM in sync for subsequent get_dom() calls.
+    Actually perform the step using Playwright so we keep a real DOM in sync for subsequent calls.
     """
-    step_type = step_dict.get("type")
-    cmd = step_dict.get("cmd")
-
-    # we only handle `type == "browser"` for this example
-    if step_type != "browser":
+    if step_dict.get("type") != "browser":
         return
 
+    cmd = step_dict.get("cmd")
     session = step_dict.get("session")
     creates_session = step_dict.get("creates_session")
 
@@ -122,8 +185,8 @@ def do_browser_action(step_dict):
         browser_sessions[creates_session] = page
         session = creates_session
 
-    if not session:
-        return  # no session to work with
+    if not session or session not in browser_sessions:
+        return
 
     page = browser_sessions.get(session)
     if not page:
@@ -156,22 +219,13 @@ def do_browser_action(step_dict):
 # Chat Orchestration
 # -------------------------------------------------------------------------------------
 
-# Example system message: instruct the AI to produce single-step Attackmate “browser” commands.
-system_message = (
-    "You are simulating a user who browses the web. "
-    "You can produce YAML-based Attackmate commands (one step at a time). "
-    "After each step, call get_dom to see what's on the new page. "
-    "Stop producing steps if you have reached the goal. "
-)
-
 # Our tools for the agent to call:
-tools = [get_dom, add_playbook_step]
+tools = [get_interactive_elements, add_playbook_step]
 
 def execute_tool_call(tool_call, tools_map):
     """Given a tool call from the model, run the corresponding Python function with provided arguments."""
     name = tool_call.function.name
     args = json.loads(tool_call.function.arguments)
-
     print(f"Assistant invoked tool: {name}({args})")
     return tools_map[name](**args)
 
@@ -192,7 +246,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # or another model
+            model="gpt-4o-mini",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
@@ -223,21 +277,19 @@ def run_full_turn(system_message, tools, messages):
 
 def main():
     messages = []
-
     while True:
-        user_input = input("User: ")
-        if not user_input.strip():
-            print("Exiting...")
+        try:
+            user_input = input("User: ")
+            if not user_input.strip():
+                print("Exiting...")
+                break
+            messages.append({"role": "user", "content": user_input})
+            new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
+            messages.extend(new_messages)
+            #print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
+        except KeyboardInterrupt:
+            print("\nExiting...")
             break
-
-        messages.append({"role": "user", "content": user_input})
-
-        new_messages = run_full_turn(system_message, tools, messages)
-        messages.extend(new_messages)
-
-        # At the end of each turn, if you want to see the entire playbook so far:
-        print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
-
 
 if __name__ == "__main__":
     main()
