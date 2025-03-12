@@ -98,19 +98,11 @@ class PlaybookState:
 # Global “playbook” so we can accumulate steps:
 playbook_state = PlaybookState()
 
-def add_sleep_playbook_step(seconds: int) -> str:
-    """Add a 'sleep' step to the YAML playbook"""
-    step = {
-        "type": "sleep",
-        "seconds": seconds
-    }
-    playbook_state.add_step(step)
-    return f"Added sleep step to the playbook:\n{yaml.dump(step, sort_keys=False)}"
 
-
-def add_browser_playbook_step(
+def add_playbook_step(
         step_type: str,
-        cmd: str,
+        seconds: Optional[int] = None,
+        cmd: Optional[str] = None,
         url: Optional[str] = None,
         selector: Optional[str] = None,
         text: Optional[str] = None,
@@ -119,17 +111,38 @@ def add_browser_playbook_step(
         screenshot_path: Optional[str] = None
 ) -> str:
     """
-    Add a single step to our Attackmate-style YAML playbook.
-    The arguments map to the fields defined for the BrowserExecutor of AttackMate:
-    - step_type: "browser" typically
-    - cmd: "visit", "click", "type", "screenshot", ...
-    - url: e.g. "https://www.example.com"
-    - selector: e.g. "a[href='/about']"
-    - text: text to type (if cmd=="type")
-    - session: session name for an existing browser context
-    - creates_session: session name if the step is creating a new session
-    - screenshot_path: file name for a screenshot
+    Add a step to the YAML playbook.
+
+    For a sleep step:
+      - Set step_type to "sleep"
+      - Provide the 'seconds' parameter
+
+    For a browser action step:
+      - step_type is typically "browser"
+      - cmd: the action to perform (e.g. "visit", "click", "type", "screenshot", ...)
+      - url: e.g. "https://www.example.com"
+      - selector: e.g. "a[href='/about']"
+      - text: text to type (if cmd=="type")
+      - session: existing browser session name
+      - creates_session: session name if the step creates a new browser context
+      - screenshot_path: file name to save the screenshot
+
+    The function adds the step to the playbook and, if it's a browser step, executes the browser action.
     """
+    if step_type == "sleep":
+        if seconds is None:
+            raise ValueError("The 'seconds' parameter must be provided for a sleep step.")
+        step = {
+            "type": "sleep",
+            "seconds": seconds
+        }
+        playbook_state.add_step(step)
+        return f"Added sleep step to the playbook:\n{yaml.dump(step, sort_keys=False)}"
+
+    # For non-sleep steps (browser actions)
+    if cmd is None:
+        raise ValueError("The 'cmd' parameter must be provided for a browser step.")
+
     step = {
         "type": step_type,
         "cmd": cmd,
@@ -207,7 +220,7 @@ def do_browser_action(step_dict):
 # -------------------------------------------------------------------------------------
 
 # Our tools for the agent to call:
-tools = [get_interactive_elements, add_browser_playbook_step, add_sleep_playbook_step]
+tools = [get_interactive_elements, add_playbook_step]
 
 def execute_tool_call(tool_call, tools_map):
     """Given a tool call from the model, run the corresponding Python function with provided arguments."""
