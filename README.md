@@ -16,7 +16,42 @@ The table below outlines the structure of the project and its contents.
 | `prompts/`         | Collection of prompts used for generating the playbooks                                                                                |
 | `src/helpers/`     | Python files for generating text docs for creating the RAG enabled GPT. Results are collected in `src/txt-docs/`.                      |
 | `src/txt-docs/`    | Text based documentation of the AttackMate for feeding the custom GPT. Generated programmatically by scraping the AttackMate codebase. |
+| `src/playbookgen/` | Python files for generating playbooks using LLM.                                                                                       |
 
 
+## PlaybookGen CLI Tool
 
+The `playbookgen` CLI tool is used for generating playbooks using the LLM model. The tool is located in the `src/playbookgen/` folder.
+
+### Setup
+
+1. Clone the repository
+2. Create a `.env` file in the project root with your OpenAI API key:
+   ```
+   OPENAI_API_KEY="your_api_key_here"
+   ```
+3. Create and activate venv, and install the package in development mode:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -e .
+   ```
+
+### Usage
+
+To run the PlaybookGen CLI tool:
+
+```bash
+cd src/playbookgen
+python main.py
+```
+
+### Troubleshooting
+
+If you encounter `ImportError: cannot import name 'OpenAI' from 'openai'`, you may need to reinstall the OpenAI package:
+
+```bash
+pip uninstall openai
+pip install openai
+```
 

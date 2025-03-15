@@ -3,7 +3,6 @@ from playbookgen.utils.browser_helpers import build_naive_css_selector
 from playbookgen.system_message import SYSTEM_MESSAGE
 from playwright.sync_api import sync_playwright, Page, ElementHandle
 from typing import Optional
-from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
 import json
