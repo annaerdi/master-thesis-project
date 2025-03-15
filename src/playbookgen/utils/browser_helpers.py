@@ -56,6 +56,39 @@ def build_naive_css_selector(element: ElementHandle) -> str:
     )
 
 
+def get_interactive_elements(session_id: str, output_file: str = "elements.json") -> str:
+    """
+    Collect interactive elements from current page, save to JSON file, and return results.
+    Returns JSON string of elements or error message if session doesn't exist.
+    """
+    if session_id not in browser_sessions:
+        return "No active session. Create one with 'visit' command first."
+
+    page = browser_sessions[session_id]
+    try:
+        elements = page.query_selector_all("a, button, input, textarea, select")
+        interactive_elements = []
+
+        for idx, elem in enumerate(elements, start=1):
+            css_selector = build_naive_css_selector(elem)
+            interactive_elements.append({
+                "index": idx,
+                "selector": f"css={css_selector}",
+                "tag": elem.evaluate("el => el.tagName"),
+                "text": elem.inner_text().strip(),
+                "type": elem.get_attribute("type"),
+                "id": elem.get_attribute("id"),
+                "class": elem.get_attribute("class")
+            })
+
+        with open(output_file, "w") as f:
+            json.dump(interactive_elements, f, indent=2)
+
+        return json.dumps(interactive_elements, indent=2)
+    except Exception as e:
+        return f"Error collecting elements: {str(e)}"
+
+
 def collect_and_save_interactive_elements(page: Page, output_file: str) -> None:
     """
     Collects potentially interactive elements from the given Playwright Page

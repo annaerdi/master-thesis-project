@@ -1,6 +1,7 @@
+from playbookgen.utils.schema import function_to_schema
+from playbookgen.utils.browser_helpers import build_naive_css_selector
+from playbookgen.system_message import SYSTEM_MESSAGE
 from playwright.sync_api import sync_playwright, Page, ElementHandle
-from function_to_schema import function_to_schema
-from system_message import SYSTEM_MESSAGE
 from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -19,35 +20,6 @@ client = OpenAI()
 
 # store active browser sessions in a dictionary so each "session_id" can track a page/browser.
 browser_sessions = {}
-
-def build_naive_css_selector(element: ElementHandle) -> str:
-    return element.evaluate("""
-        (el) => {
-            function getSelector(node) {
-                if (!node || node.nodeType !== Node.ELEMENT_NODE) return '';
-                let selector = node.tagName.toLowerCase();
-                if (node.id) {
-                    selector += '#' + node.id;
-                    return selector;
-                }
-                if (node.className) {
-                    const className = node.className.trim().split(' ')[0];
-                    if (className) selector += '.' + className;
-                }
-                const parent = node.parentElement;
-                if (!parent) return selector;
-                let index = 1;
-                let sibling = node.previousElementSibling;
-                while (sibling) {
-                    if (sibling.tagName === node.tagName) index += 1;
-                    sibling = sibling.previousElementSibling;
-                }
-                selector += ':nth-of-type(' + index + ')';
-                return getSelector(parent) + ' > ' + selector;
-            }
-            return getSelector(el);
-        }
-    """)
 
 
 def get_interactive_elements(session_id: str, output_file: str = "elements.json") -> str:
