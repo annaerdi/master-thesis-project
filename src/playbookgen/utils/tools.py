@@ -1,7 +1,7 @@
 import json
 import yaml
 from typing import Optional
-from playbookgen.agents import RunContextWrapper, function_tool
+from agents import RunContextWrapper, function_tool
 from playbookgen.context import AppContext
 from playbookgen.utils.browser_helpers import build_naive_css_selector
 from playbookgen.utils.browser import do_browser_action
