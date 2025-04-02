@@ -1,8 +1,9 @@
-from dataclasses import dataclass
-from typing import Dict, List
-from playwright.async_api import Page
+from pydantic import BaseModel
+from typing import Dict, List, Optional, Any
 
-@dataclass
-class AppContext:
-    browser_sessions: Dict[str, Page]
-    playbook: List[dict]
+class AppContext(BaseModel):
+    browser_sessions: Dict[str, Any] = {}
+    playbook: List[dict] = []
+    current_page_summary: str = ""
+    last_interactive_elements: List[dict] = []
+    user_goal: str = ""
