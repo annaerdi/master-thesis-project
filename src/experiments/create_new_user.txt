@@ -1,0 +1,485 @@
+(venv) erdia@L3DSS2415:~/projects/master-thesis-project/src/playbookgen$ python main.py
+What's the user's goal? Make a playbook for a diligent central alarm system operator who logs into ZoneMinder and creates a new user. The website is at http://40.118.57.244/zm/. Username is admin, password is thIs_i5_A_tESt_PasSw0Rd
+User Simulation Agent: {"type": "browser", "cmd": "visit", "url": "http://40.118.57.244/zm/", "creates_session": "zm_session"}
+Browser Agent: Tool call output: Added browser step:\ntype: browser
+cmd: visit
+url: http://40.118.57.244/zm/
+creates_session: zm_session
+
+Browser Agent: Tool call output: [
+  {
+    "index": 1,
+    "selector": "css=a#getNavBrandHTML",
+    "tag": "A",
+    "text": "ZoneMinder",
+    "type": null,
+    "id": "getNavBrandHTML",
+    "class": "dropdown"
+  },
+  {
+    "index": 2,
+    "selector": "css=html > body:nth-of-type(1) > div.container-fluid:nth-of-type(1) > nav.navbar:nth-of-type(1) > div.navbar-brand:nth-of-type(1) > ul.dropdown-menu:nth-of-type(1) > li:nth-of-type(1) > a.dropdown-item:nth-of-type(1)",
+    "tag": "A",
+    "text": "ZoneMinder",
+    "type": null,
+    "id": null,
+    "class": "dropdown-item"
+  },
+  {
+    "index": 3,
+    "selector": "css=html > body:nth-of-type(1) > div.container-fluid:nth-of-type(1) > nav.navbar:nth-of-type(1) > div.navbar-brand:nth-of-type(1) > ul.dropdown-menu:nth-of-type(1) > li:nth-of-type(2) > a.dropdown-item:nth-of-type(1)",
+    "tag": "A",
+    "text": "Documentation",
+    "type": null,
+    "id": null,
+    "class": "dropdown-item"
+  },
+  {
+    "index": 4,
+    "selector": "css=html > body:nth-of-type(1) > div.container-fluid:nth-of-type(1) > nav.navbar:nth-of-type(1) > div.navbar-brand:nth-of-type(1) > ul.dropdown-menu:nth-of-type(1) > li:nth-of-type(3) > a.dropdown-item:nth-of-type(1)",
+    "tag": "A",
+    "text": "Support",
+    "type": null,
+    "id": null,
+    "class": "dropdown-item"
+  },
+  {
+    "index": 5,
+    "selector": "css=html > body:nth-of-type(1) > div.container-fluid:nth-of-type(1) > nav.navbar:nth-of-type(1) > div.nav:nth-of-type(2) > button.navbar-toggler:nth-of-type(1)",
+    "tag": "BUTTON",
+    "text": "Toggle navigation",
+    "type": "button",
+    "id": null,
+    "class": "navbar-toggler"
+  },
+  {
+    "index": 6,
+    "selector": "css=form#loginForm > input:nth-of-type(1)",
+    "tag": "INPUT",
+    "text": "",
+    "type": "hidden",
+    "id": null,
+    "class": null
+  },
+  {
+    "index": 7,
+    "selector": "css=form#loginForm > input:nth-of-type(2)",
+    "tag": "INPUT",
+    "text": "",
+    "type": "hidden",
+    "id": null,
+    "class": null
+  },
+  {
+    "index": 8,
+    "selector": "css=form#loginForm > input:nth-of-type(3)",
+    "tag": "INPUT",
+    "text": "",
+    "type": "hidden",
+    "id": null,
+    "class": null
+  },
+  {
+    "index": 9,
+    "selector": "css=input#inputUsername",
+    "tag": "INPUT",
+    "text": "",
+    "type": "text",
+    "id": "inputUsername",
+    "class": "form-control"
+  },
+  {
+    "index": 10,
+    "selector": "css=input#inputPassword",
+    "tag": "INPUT",
+    "text": "",
+    "type": "password",
+    "id": "inputPassword",
+    "class": "form-control"
+  },
+  {
+    "index": 11,
+    "selector": "css=div#loginform > button.btn:nth-of-type(1)",
+    "tag": "BUTTON",
+    "text": "LOGIN",
+    "type": "submit",
+    "id": null,
+    "class": "btn btn-lg btn-primary btn-block"
+  }
+]
+Browser Agent: ```yaml
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zm_session"
+
+  # Interactive element: Username input field
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "your_username"
+    session: "zm_session"
+
+  # Interactive element: Password input field
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "your_password"
+    session: "zm_session"
+
+  # Interactive element: Login button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "zm_session"
+
+  # Capture a screenshot after login
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "login_success.png"
+    session: "zm_session"
+```
+
+This YAML playbook logs into the ZoneMinder system, capturing a screenshot after attempting to log in. Adjust username and password fields as necessary.
+User Simulation Agent: ```yaml
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zm_session"
+
+  # Type in the username
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "zm_session"
+
+  # Type in the password
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "zm_session"
+
+  # Click the login button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "zm_session"
+
+  # Wait for the page to load
+  - type: sleep
+    seconds: 5
+
+  # Click the "Users" section (assuming this opens user management)
+  # Selector has to be found, placeholder example:
+  - type: browser
+    cmd: click
+    selector: "a#usersSection"  # Replace with the actual selector for the users section
+    session: "zm_session"
+
+  # Click the "Add New User" button
+  # Selector has to be found, placeholder example:
+  - type: browser
+    cmd: click
+    selector: "button#addUser"  # Replace with the actual selector for adding a new user
+    session: "zm_session"
+
+  # Fill in user details, example placeholders
+  - type: browser
+    cmd: type
+    selector: "input#newUsername"
+    text: "new_user"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newPassword"
+    text: "new_password"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newEmail"
+    text: "new_user@example.com"
+    session: "zm_session"
+
+  # Save the new user
+  # Selector has to be found, placeholder example:
+  - type: browser
+    cmd: click
+    selector: "button#saveUser"  # Replace with the actual selector to save the user
+    session: "zm_session"
+
+  # Capture a screenshot after creating the user
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "user_creation_success.png"
+    session: "zm_session"
+```
+
+Replace selector placeholders with actual selectors from the “Users” section for user management and creation elements.
+⚠️ Invalid JSON format from UserSimAgent, skipping this step.
+User Simulation Agent: ```yaml
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zm_session"
+
+  # Type in the username
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "zm_session"
+
+  # Type in the password
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "zm_session"
+
+  # Click the login button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "zm_session"
+
+  # Wait for the page to load
+  - type: sleep
+    seconds: 5
+
+  # Navigate to the Users management section
+  # Placeholders for actual selectors; adjust as necessary based on your system
+  - type: browser
+    cmd: click
+    selector: "a[href='/zm/users']"  # Replace with actual path to users section
+    session: "zm_session"
+
+  # Click 'Add New User' or similar button
+  - type: browser
+    cmd: click
+    selector: "button#addNewUser"  # Replace with actual selector for adding user
+    session: "zm_session"
+
+  # Enter new user details
+  - type: browser
+    cmd: type
+    selector: "input#newUsername"
+    text: "new_user"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newPassword"
+    text: "new_password"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newEmail"
+    text: "new_user@example.com"
+    session: "zm_session"
+
+  # Save the new user
+  - type: browser
+    cmd: click
+    selector: "button#saveUser"  # Replace with actual selector to save the user
+    session: "zm_session"
+
+  # Capture a screenshot after user creation
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "user_creation_success.png"
+    session: "zm_session"
+```
+
+Replace the placeholder selectors with actual selectors from your system's User management interface.
+⚠️ Invalid JSON format from UserSimAgent, skipping this step.
+User Simulation Agent: ```yaml
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zm_session"
+
+  # Enter the username
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "zm_session"
+
+  # Enter the password
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "zm_session"
+
+  # Click the LOGIN button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn"
+    session: "zm_session"
+
+  # Wait for the dashboard to load
+  - type: sleep
+    seconds: 5
+
+  # Navigate to the Users management section
+  - type: browser
+    cmd: click
+    selector: "nav a[href='/zm/users']"  # Example: Replace with actual path to users section
+    session: "zm_session"
+
+  # Click 'Add New User'
+  - type: browser
+    cmd: click
+    selector: "button#addUser"  # Example: Replace with actual selector
+    session: "zm_session"
+
+  # Fill in new user details
+  - type: browser
+    cmd: type
+    selector: "input#newUsername"
+    text: "new_user"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newPassword"
+    text: "new_password"
+    session: "zm_session"
+
+  - type: browser
+    cmd: type
+    selector: "input#newEmail"
+    text: "new_user@example.com"
+    session: "zm_session"
+
+  # Save the new user
+  - type: browser
+    cmd: click
+    selector: "button#saveUser"  # Example: Replace with actual selector
+    session: "zm_session"
+
+  # Capture a screenshot of the new user creation
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "new_user_created.png"
+    session: "zm_session"
+```
+
+Adjust selector placeholders for your system as necessary.
+⚠️ Invalid JSON format from UserSimAgent, skipping this step.
+^CTraceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/src/playbookgen/main.py", line 50, in main
+    result = await Runner.run(current_agent, input_items, context=ctx)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/agents/run.py", line 215, in run
+    input_guardrail_results, turn_result = await asyncio.gather(
+                                           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/agents/run.py", line 739, in _run_single_turn
+    new_response = await cls._get_new_response(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/agents/run.py", line 896, in _get_new_response
+    new_response = await model.get_response(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/agents/models/openai_responses.py", line 75, in get_response
+    response = await self._fetch_response(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/agents/models/openai_responses.py", line 234, in _fetch_response
+    return await self._client.responses.create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/openai/resources/responses/responses.py", line 1415, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1767, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1461, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1500, in _request
+    response = await self._client.send(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpx/_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpx/_transports/default.py", line 394, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 256, in handle_async_request
+    raise exc from None
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py", line 236, in handle_async_request
+    response = await connection.handle_async_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/connection.py", line 103, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/http11.py", line 136, in handle_async_request
+    raise exc
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/http11.py", line 106, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/http11.py", line 177, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_async/http11.py", line 217, in _receive_event
+    data = await self._network_stream.read(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py", line 35, in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/anyio/streams/tls.py", line 204, in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/anyio/streams/tls.py", line 147, in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/erdia/projects/master-thesis-project/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1246, in receive
+    await self._protocol.read_event.wait()
+  File "/usr/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/erdia/projects/master-thesis-project/src/playbookgen/main.py", line 107, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt
+Exception ignored in: <function BaseSubprocessTransport.__del__ at 0x7f84e0830cc0>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/asyncio/base_subprocess.py", line 126, in __del__
+  File "/usr/lib/python3.12/asyncio/base_subprocess.py", line 104, in close
+  File "/usr/lib/python3.12/asyncio/unix_events.py", line 767, in close
+  File "/usr/lib/python3.12/asyncio/unix_events.py", line 753, in write_eof
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 795, in call_soon
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 541, in _check_closed
+RuntimeError: Event loop is closed
