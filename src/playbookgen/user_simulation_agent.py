@@ -9,17 +9,16 @@ Respond strictly in one of the following two formats:
 1. A single-line JSON object describing the next browser action.
 2. The string DONE (if the goal is completed).
 
-You can use these commands: visit, click, type, screenshot, sleep
+You can use these commands: visit, click, type, sleep
 
 Fields to use in JSON:
 - type (always "browser" or "sleep")
-- cmd (visit, click, type, screenshot)
+- cmd (visit, click, type)
 - url (for visit)
 - selector (CSS selector for click/type)
 - text (for typing input)
 - session (existing session name)
 - creates_session (new session name if this is the first step)
-- screenshot_path (if taking screenshot)
 
 Examples:
 {"type": "browser", "cmd": "visit", "url": "https://www.wikipedia.org/", "creates_session": "main_session"}
