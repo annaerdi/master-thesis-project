@@ -8,7 +8,7 @@ async def run(agent: Agent):
     user_message = (
         "Please open google.com, search for 'OpenAI', and give me a snapshot of the results."
     )
-    result = await Runner.run(starting_agent=agent, input=user_message)
+    result = await Runner.run(starting_agent=agent, input=user_message, max_turns=50)
     print("\nFinal output from the agent:")
     print(result.final_output)
 
