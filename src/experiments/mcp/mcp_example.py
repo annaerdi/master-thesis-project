@@ -4,10 +4,14 @@ from agents.mcp import MCPServerSse
 from agents.model_settings import ModelSettings
 
 async def run(agent: Agent):
-    print("Asking the agent to open Google and search for 'OpenAI'...")
     user_message = (
-        "Please open google.com, search for 'OpenAI', and give me a snapshot of the results."
+        "You are an LLM simulating a CAS (Central Alarm System) operator using ZoneMinder by accessing http://40.118.57.244/zm/ "
+        "with username admin and password thIs_i5_A_tESt_PasSw0Rd, where your task is to log in. "
+        "Check system logs and alerts, behave like a real operator (focused, attentive, thorough), and create a new user "
+        "(testuser / anoTH3er_tESt_PasSw0Rd) without switching accounts. Once you created the user, you get back to your "
+        "regular CAS operator tasks, acting naturally and exploring the interface unscripted within a 5-minute session. "
     )
+    print("User prompt:", user_message)
     result = await Runner.run(starting_agent=agent, input=user_message, max_turns=50)
     print("\nFinal output from the agent:")
     print(result.final_output)
@@ -35,6 +39,39 @@ async def main():
                 instructions=(
                     "You are a helpful assistant with access to Playwright browser tools. "
                     "When the user requests something involving the web, you must call the appropriate browser tool."
+                    "Also, at the end of your task you must generate a yaml playbook for the actions you took."
+                    """
+                    Here is how an example playbook looks like:
+                    ```yaml
+                    commands:
+                      - type: browser
+                        cmd: visit
+                        url: "https://www.wikipedia.org/"
+                        creates_session: "my_browser_session"
+
+                      - type: browser
+                        cmd: click
+                        selector: "a[href='/about']"
+                        session: "my_browser_session"
+                    
+                      - type: browser
+                        cmd: type
+                        selector: "input[id='searchInput']"
+                        text: "Testing"
+                        session: "my_browser_session"
+                    
+                      - type: browser
+                        cmd: click
+                        selector: "button[type='submit']"
+                        session: "my_browser_session"
+                    
+                      - type: browser
+                        cmd: click
+                        selector: "input[name='btnK']"
+                        session: "my_browser_session"
+                    ```
+                    Make sure you use CSS selectors and not aria labels for the final playbook!
+                    """
                 ),
                 mcp_servers=[playwright_server],
                 # Force the model to use a tool if needed

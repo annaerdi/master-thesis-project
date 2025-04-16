@@ -1,0 +1,70 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='view']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "input[type='submit']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options&tab=users']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[onclick*='add']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    text: "testuser"
+    selector: "input[name='newUser\\[Username\\]']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='newUser\\[Password\\]']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='conf_password']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[onclick*='save']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=log']"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=console']"
+    session: "my_browser_session"
