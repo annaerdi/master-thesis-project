@@ -7,7 +7,7 @@ commands:
   - type: browser
     cmd: type
     text: "admin"
-    selector: "input[name='view']"
+    selector: "input[name='username']"
     session: "my_browser_session"
 
   - type: browser
@@ -18,7 +18,7 @@ commands:
 
   - type: browser
     cmd: click
-    selector: "input[type='submit']"
+    selector: "button[type='submit']"
     session: "my_browser_session"
 
   - type: browser
@@ -33,12 +33,12 @@ commands:
 
   - type: browser
     cmd: click
-    selector: "button[onclick*='add']"
+    selector: "#contentButtons > button:nth-child(1)"
     session: "my_browser_session"
 
   - type: browser
     cmd: type
-    text: "testuser"
+    text: "testuser5"
     selector: "input[name='newUser\\[Username\\]']"
     session: "my_browser_session"
 
@@ -56,7 +56,7 @@ commands:
 
   - type: browser
     cmd: click
-    selector: "button[onclick*='save']"
+    selector: "button[type='submit']"
     session: "my_browser_session"
 
   - type: browser
