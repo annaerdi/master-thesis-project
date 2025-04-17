@@ -1,0 +1,245 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on monitor 1
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-1 > td.colName > a"
+    session: "cas_session"
+
+  # looking at the event logs
+  - type: sleep
+    seconds: 7
+
+  # click on the event log (2nd in the tabel)
+  - type: browser
+    cmd: click
+    selector: 'tr[data-index="1"] td:nth-child(3) a'
+    session: "cas_session"
+
+  # goes back to the monitor
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  # click on download button
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group > button"
+    session: "cas_session"
+
+  # select txt
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group.show > div > a:nth-child(4)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # go back again
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  # monitor 2
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-2 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 10
+
+  # downloads text again
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group > button"
+    session: "cas_session"
+
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group.show > div > a:nth-child(4)"
+    session: "cas_session"
+
+  # go back again
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # monitor 3
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-4 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on 10th event log in tabel
+  - type: browser
+    cmd: click
+    selector: 'tr[data-index="10"] td:nth-child(3) a'
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # go back again
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # download
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group > button"
+    session: "cas_session"
+
+  # select json
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group.show > div > a:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # download text actually
+  # click on download button
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group > button"
+    session: "cas_session"
+
+  # select txt
+  - type: browser
+    cmd: click
+    selector: "#events > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div > div.export.btn-group.show > div > a:nth-child(4)"
+    session: "cas_session"
+
+  # select logs from top nav
+  - type: browser
+    cmd: click
+    selector: "#getLogHTML > a > span"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 10
+
+  # download txt logs
+  - type: browser
+    cmd: click
+    selector: "#page > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div.columns.columns-right.btn-group.float-right > div.export.btn-group > button"
+    session: "cas_session"
+
+  - type: browser
+    cmd: click
+    selector: "#page > div.bootstrap-table.bootstrap4 > div.fixed-table-toolbar > div.columns.columns-right.btn-group.float-right > div.export.btn-group.show > div > a:nth-child(4)"
+    session: "cas_session"
+
+  # click on audit events report
+  - type: browser
+    cmd: click
+    selector: "#getRprtEvntAuditHTML > a"
+    session: "cas_session"
+
+  # monitor 1
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-1 > td.colName > a"
+    session: "cas_session"
+
+  # cycle from nav bar
+  - type: browser
+    cmd: click
+    selector: "#getCycleHTML > a"
+    session: "cas_session"
+
+  # options
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  # users
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(17) > a"
+    session: "cas_session"
+
+  # add new user
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+  - type: browser
+    cmd: type
+    text: "testuser6"
+    selector: "input[name='newUser\\[Username\\]']"
+    session: "cas_session"
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='newUser\\[Password\\]']"
+    session: "cas_session"
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='conf_password']"
+    session: "cas_session"
+
+  # SELECT VIEW FOR EACH
+  # TODO
+
+  # SUBMIT
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # log out
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "cas_session"
+  - type: browser
+    cmd: click
+    selector: "#logoutForm > button:nth-child(2)"
+    session: "cas_session"
