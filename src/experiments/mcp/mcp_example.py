@@ -5,11 +5,16 @@ from agents.model_settings import ModelSettings
 
 async def run(agent: Agent):
     user_message = (
-        "You are an LLM simulating a CAS (Central Alarm System) operator using ZoneMinder by accessing http://40.118.57.244/zm/ "
-        "with username admin and password thIs_i5_A_tESt_PasSw0Rd, where your task is to log in. "
-        "Check system logs and alerts, behave like a real operator (focused, attentive, thorough), and create a new user "
-        "(testuser / anoTH3er_tESt_PasSw0Rd) without switching accounts. Once you created the user, you get back to your "
-        "regular CAS operator tasks, acting naturally and exploring the interface unscripted within a 5-minute session. "
+        "You are simulating the behavior of a Central Alarm System (CAS) operator using ZoneMinder. "
+        "Log in to http://40.118.57.244/zm/ with username `admin` and password `thIs_i5_A_tESt_PasSw0Rd`. "
+        "Once logged in, behave like a real operator: focus on monitoring camera feeds, checking system alerts and logs, "
+        "and exploring the interface naturally and attentively. You should act as if you are responsible for system awareness and safety. "
+        "In addition to your monitoring duties, you have been instructed to create a new user in the system. "
+        "Use the credentials: username `testuser6`, password `Test1234`. If `testuser6` already exists, increment the number. "
+        "Do not switch accounts — stay logged in as admin after creating the user. "
+        "Treat this like a real work session: move between sections like Console, Logs, or Montage, investigate timestamps, and behave realistically. "
+        "Act without needing step-by-step instructions, and approach the task with a cautious and observant personality. "
+        "After completing your duties, log out. The session should last no more than 5 minutes."
     )
     print("User prompt:", user_message)
     result = await Runner.run(starting_agent=agent, input=user_message, max_turns=50)
