@@ -41,9 +41,9 @@ def get_interactive_elements(session_id: str, output_file: str = "elements.json"
                 "selector": f"css={css_selector}",
                 "tag": elem.evaluate("el => el.tagName"),
                 "text": elem.inner_text().strip(),
-                "type": elem.get_attribute("type"),
-                "id": elem.get_attribute("id"),
-                "class": elem.get_attribute("class")
+                # "type": elem.get_attribute("type"),
+                # "id": elem.get_attribute("id"),
+                # "class": elem.get_attribute("class")
             })
 
         with open(output_file, "w") as f:
@@ -78,8 +78,7 @@ def add_playbook_step(
         selector: Optional[str] = None,
         text: Optional[str] = None,
         session: Optional[str] = None,
-        creates_session: Optional[str] = None,
-        screenshot_path: Optional[str] = None
+        creates_session: Optional[str] = None
 ) -> str:
     """
     Add a step to the YAML playbook.
@@ -90,13 +89,12 @@ def add_playbook_step(
 
     For a browser action step:
       - step_type is typically "browser"
-      - cmd: the action to perform (e.g. "visit", "click", "type", "screenshot", ...)
+      - cmd: the action to perform (e.g. "visit", "click", "type")
       - url: e.g. "https://www.example.com"
       - selector: e.g. "a[href='/about']"
       - text: text to type (if cmd=="type")
       - session: existing browser session name
       - creates_session: session name if the step creates a new browser context
-      - screenshot_path: file name to save the screenshot
 
     The function adds the step to the playbook and, if it's a browser step, executes the browser action.
     """
@@ -128,8 +126,6 @@ def add_playbook_step(
         step["session"] = session
     if creates_session is not None:
         step["creates_session"] = creates_session
-    if screenshot_path is not None:
-        step["screenshot_path"] = screenshot_path
 
     playbook_state.add_step(step)
     do_browser_action(step)
@@ -178,10 +174,6 @@ def do_browser_action(step_dict):
         if selector:
             page.fill(selector, text)
 
-    elif cmd == "screenshot":
-        screenshot_path = step_dict.get("screenshot_path", "screenshot.png")
-        page.screenshot(path=screenshot_path)
-
     else:
         print("Unknown command:", cmd)
 
@@ -217,7 +209,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1-mini",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
