@@ -6,7 +6,8 @@ dependencies = [
     "openai",
     "python-dotenv",
     "playwright",
-    "PyYAML"
+    "PyYAML",
+    "openai-agents",
 ]
 
 [build-system]

@@ -40,11 +40,13 @@ async def main():
             # Create the agent that has access to the Playwright MCP server
             agent = Agent(
                 name="Assistant",
+                model="gpt-4.1",
                 # Provide instructions so the agent knows it should use the browser tools:
                 instructions=(
                     "You are a helpful assistant with access to Playwright browser tools. "
                     "When the user requests something involving the web, you must call the appropriate browser tool."
                     "Also, at the end of your task you must generate a yaml playbook for the actions you took."
+                    "Take into consideration the timing between the actions. Add the sleep time between the actions."
                     """
                     Here is how an example playbook looks like:
                     ```yaml
@@ -53,17 +55,26 @@ async def main():
                         cmd: visit
                         url: "https://www.wikipedia.org/"
                         creates_session: "my_browser_session"
+                        
+                      - type: sleep
+                        seconds: 2
 
                       - type: browser
                         cmd: click
                         selector: "a[href='/about']"
                         session: "my_browser_session"
+                        
+                      - type: sleep
+                        seconds: 3
                     
                       - type: browser
                         cmd: type
                         selector: "input[id='searchInput']"
                         text: "Testing"
                         session: "my_browser_session"
+                        
+                      - type: sleep
+                        seconds: 1
                     
                       - type: browser
                         cmd: click
