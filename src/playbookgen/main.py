@@ -217,7 +217,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4.1",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
