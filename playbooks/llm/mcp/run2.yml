@@ -1,0 +1,131 @@
+#TODO: check if playbook is correct
+
+"""
+$ python mcp_example.py 
+View trace (if using the OpenAI trace viewer): https://platform.openai.com/traces/trace?trace_id=trace_8b3592a681044f3893f620fdf16456c7
+
+User prompt: You are simulating the behavior of a Central Alarm System (CAS) operator using ZoneMinder. Log in to http://40.118.57.244/zm/ with username `admin` and password `thIs_i5_A_tESt_PasSw0Rd`. Once logged in, behave like a real operator: focus on monitoring camera feeds, checking system alerts and logs, and exploring the interface naturally and attentively. You should act as if you are responsible for system awareness and safety. In addition to your monitoring duties, you have been instructed to create a new user in the system. Use the credentials: username `testuser6`, password `Test1234`. If `testuser6` already exists, increment the number. Do not switch accounts — stay logged in as admin after creating the user. Treat this like a real work session: move between sections like Console, Logs, or Montage, investigate timestamps, and behave realistically. Act without needing step-by-step instructions, and approach the task with a cautious and observant personality. After completing your duties, log out. The session should last no more than 5 minutes.
+
+Final output from the agent:
+Here’s the YAML playbook that replicates the full session as a careful ZoneMinder CAS operator, including natural operator timing and realistic navigation between key system sections:
+
+"""
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "my_browser_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: "admin"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit'], input[type='submit'], button:contains('Login')"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Navigation to Options
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Go to the Users tab
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options&tab=users']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Add a new user, next available user (testuser8 based on current system state)
+  - type: browser
+    cmd: click
+    selector: "button:contains('Add New User')"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "input[name='newUser[Username]']"
+    text: "testuser8"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='newUser[Password]']"
+    text: "Test1234"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: type
+    selector: "input[name='conf_password']"
+    text: "Test1234"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button:contains('Save')"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 1.5
+
+  # Console - to check camera feed/status
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=console']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 4
+
+  # Logs - check system events/alerts
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=log']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 6
+
+  # Montage - visual check of all camera feeds
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=montage']"
+    session: "my_browser_session"
+
+  - type: sleep
+    seconds: 7
+
+  # Prepare to log out
+  - type: browser
+    cmd: click
+    selector: "a[href='#']:contains('account_circle admin')"
+    session: "my_browser_session"
+
+  - type: browser
+    cmd: click
+    selector: "button:contains('Logout')"
+    session: "my_browser_session"

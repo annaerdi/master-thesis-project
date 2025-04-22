@@ -1,0 +1,142 @@
+#TODO: check if playbook is correct
+
+"""
+$ python mcp_example.py 
+View trace (if using the OpenAI trace viewer): https://platform.openai.com/traces/trace?trace_id=trace_6fc04af4da2a43e38406d229b4f26730
+
+User prompt: You are simulating the behavior of a Central Alarm System (CAS) operator using ZoneMinder. Log in to http://40.118.57.244/zm/ with username `admin` and password `thIs_i5_A_tESt_PasSw0Rd`. Once logged in, behave like a real operator: focus on monitoring camera feeds, checking system alerts and logs, and exploring the interface naturally and attentively. You should act as if you are responsible for system awareness and safety. In addition to your monitoring duties, you have been instructed to create a new user in the system. Use the credentials: username `testuser6`, password `Test1234`. If `testuser6` already exists, increment the number. Do not switch accounts — stay logged in as admin after creating the user. Treat this like a real work session: move between sections like Console, Logs, or Montage, investigate timestamps, and behave realistically. Act without needing step-by-step instructions, and approach the task with a cautious and observant personality. After completing your duties, log out. The session should last no more than 5 minutes.
+
+Final output from the agent:
+The session as a Central Alarm System operator in ZoneMinder is complete. Below is the YAML playbook for the actions taken:
+"""
+
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: type
+    selector: "input[name='username']"
+    text: "admin"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "input[name='password']"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=options&tab=users']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: type
+    selector: "input[name='newUser[Username]']"
+    text: "testuser7"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "input[name='newUser[Password]']"
+    text: "Test1234"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "input[name='conf_password']"
+    text: "Test1234"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: click
+    selector: "button:has-text('Save')"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=console']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=montage']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "a[href='?view=log']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "header nav a[role='button']"
+    session: "zone_minder_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: click
+    selector: "button:has-text('Logout')"
+    session: "zone_minder_session"
