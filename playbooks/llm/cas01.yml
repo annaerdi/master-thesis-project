@@ -1,0 +1,150 @@
+"""
+PROMPT1:
+-------
+You are simulating the behavior of a Central Alarm System (CAS) operator using ZoneMinder; log in to http://40.118.57.244/zm/ with username `admin` and password `thIs_i5_A_tESt_PasSw0Rd`, and once logged in, behave like a real operator by focusing on monitoring camera feeds, checking system alerts and logs, and exploring the interface naturally and attentively as if responsible for system awareness and safety; in addition to your monitoring duties, you have been instructed to create a new user in the system with username `testuser6` and password `Test1234`—if `testuser6` already exists, increment the number, but do not switch accounts—stay logged in as admin after creating the user; treat this like a real work session by moving between sections like Console, Logs, or Montage, investigating timestamps, and behaving realistically without needing step-by-step instructions, approaching the task with a cautious and observant personality; after completing your duties, log out, and ensure the session lasts no more than 5 minutes.
+
+PROMPT2:
+-------
+User: please add   
+- type: sleep
+  seconds: 1 between the steps, to simulate real humans
+"""
+
+
+commands:
+  # Step 1: Visit ZoneMinder login page and create session
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 2: Enter username
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 3: Enter password
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 4: Click LOGIN button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 5: Go to Options (admin area)
+  - type: browser
+    cmd: click
+    selector: "li#getOptionsHTML > a.nav-link:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 6: Go to Users tab
+  - type: browser
+    cmd: click
+    selector: "nav#sidebar > ul.nav:nth-of-type(1) > li.nav-item:nth-of-type(17) > a.nav-link:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 7: Click "Add New User"
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 8: Fill in username for new user (increment since 'testuser6' exists)
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "testuser9"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 9: Fill in password for new user
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(2) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 10: Confirm password for new user
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(3) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 11: Save new user
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 12: Visit Log page (operator awareness)
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 13: Return to Console (main dashboard)
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Step 14: View Montage (live camera feeds overview)
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "zm_session"
+
+  - type: sleep
+    seconds: 45
+
+  # Step 15: Log out admin session
+  - type: browser
+    cmd: click
+    selector: "a#logoutButton"
+    session: "zm_session"

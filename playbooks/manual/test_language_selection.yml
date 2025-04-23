@@ -1,0 +1,64 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Type in the username
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  # Type in the password
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  # press login button
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  # Go to Options
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  # Go to Users tab
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(17) > a"
+    session: "cas_session"
+
+  # Add new user
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # open dropdown
+  - type: browser
+    cmd: click
+    selector: "select[name='newUser[Language]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  - type: browser
+    cmd: click
+    selector: "option[value='ba_ba']"
+    session: "cas_session"
+    #  ERROR   | Locator.wait_for: Timeout 10000ms exceeded.
+    #  Call log:
+    #    - waiting for locator("option[value='ba_ba']") to be visible
+    #    - 25 × locator resolved to hidden <option value="ba_ba">ba_ba</option>

@@ -1,0 +1,170 @@
+commands:
+  # Visit ZoneMinder login page and create session
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_admin_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 20
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  - type: sleep
+    seconds: 5
+
+  # Log in as admin
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 4
+
+  # Go to Options
+  - type: browser
+    cmd: click
+    selector: "li#getOptionsHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 3
+
+  # Navigate to Users tab
+  - type: browser
+    cmd: click
+    selector: "nav#sidebar > ul.nav:nth-of-type(1) > li.nav-item:nth-of-type(17) > a.nav-link:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Click "ADD NEW USER"
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Fill user info (username: testuser10 does not exist, so iterating up as instructed)
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "testuser10"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(2) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 1
+
+  - type: browser
+    cmd: type
+    selector: "table#contentTable > tbody:nth-of-type(1) > tr:nth-of-type(3) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Save new user
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 4
+
+  # As operator, Switch to Montage (view feeds)
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 3
+
+  # Screenshot feeds overview
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "montage_overview.png"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Review logs
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Screenshot logs
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "system_log_review.png"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Return to Console for system & monitor status
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Screenshot Console main page
+  - type: browser
+    cmd: screenshot
+    screenshot_path: "console_status.png"
+    session: "cas_admin_session"
+
+  - type: sleep
+    seconds: 2
+
+  # Log out (end session)
+  - type: browser
+    cmd: click
+    selector: "a#logoutButton"
+    session: "cas_admin_session"

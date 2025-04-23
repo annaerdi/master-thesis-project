@@ -1,0 +1,39 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Type in the username
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  # Type in the password
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  # press login button
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  # click on ZoneMinder logo (1:35)
+  - type: browser
+    cmd: click
+    selector: "#getNavBrandHTML"
+    session: "cas_session"
+
+  - type: browser
+    cmd: click
+    selector: "body > div.container-fluid.p-0 > nav.navbar.navbar-expand-md.navbar-dark.bg-dark.justify-content-center.flex-row > div.navbar-brand.justify-content-start.align-self-start.show > ul > li:nth-child(1) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 10
