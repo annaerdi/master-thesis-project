@@ -41,9 +41,9 @@ def get_interactive_elements(session_id: str, output_file: str = "elements.json"
                 "selector": f"css={css_selector}",
                 "tag": elem.evaluate("el => el.tagName"),
                 "text": elem.inner_text().strip(),
-                # "type": elem.get_attribute("type"),
-                # "id": elem.get_attribute("id"),
-                # "class": elem.get_attribute("class")
+                "type": elem.get_attribute("type"),
+                "id": elem.get_attribute("id"),
+                "class": elem.get_attribute("class")
             })
 
         with open(output_file, "w") as f:
@@ -209,7 +209,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="o4-mini",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
