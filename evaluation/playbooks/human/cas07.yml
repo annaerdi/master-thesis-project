@@ -1,0 +1,267 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  # Start the recording here
+  - type: sleep
+    seconds: 1
+
+  # Type in the username (0:01)
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Type in the password (0:02)
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # press login button (0:04)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on monitor 1 (0:10)
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-1 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # go back to the monitor page (0:14)
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 7
+
+  # click on admin (0:21)
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # click on cancel (0:22)
+  - type: browser
+    cmd: click
+    selector: "#logoutForm > button:nth-child(3)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on console (0:25)
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on options (0:28)
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click on config (0:36)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(3) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on API (0:39)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(4) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # click on server (0:40)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(5) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click users (0:42)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(17) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click add new user (0:45)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # fill in password for new user (0:48)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='newUser\\[Password\\]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # fill in confirm password for new user (0:51)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='conf_password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 7
+
+  # save new user (0:58)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on groups (1:04)
+  - type: browser
+    cmd: click
+    selector: "#getGroupsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on cycle (1:07)
+  - type: browser
+    cmd: click
+    selector: "#getCycleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click monitor 2 on the side list (1:13)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(2) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on monitor 3 in the list (1:16)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(3) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on cycle again (1:23)
+  - type: browser
+    cmd: click
+    selector: "#getCycleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on Montage (1:25)
+  - type: browser
+    cmd: click
+    selector: "#getMontageHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on Montage Review (1:27)
+  - type: browser
+    cmd: click
+    selector: "#getMontageReviewHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on Audit Event Report (1:30)
+  - type: browser
+    cmd: click
+    selector: "#getRprtEvntAuditHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on ZoneMinder logo (1:35)
+  - type: browser
+    cmd: click
+    selector: "#getNavBrandHTML"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "body > div.container-fluid.p-0 > nav.navbar.navbar-expand-md.navbar-dark.bg-dark.justify-content-center.flex-row > div.navbar-brand.justify-content-start.align-self-start.show > ul > li:nth-child(1) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # then checks again back to zm, but doesn't log out (1:42)

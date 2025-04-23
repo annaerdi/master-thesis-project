@@ -1,0 +1,146 @@
+#model: gpt-4.1
+
+#User: Simulate the behavior of a Central Alarm System (CAS) operator using ZoneMinder at http://40.118.57.244/zm/ (login: admin / thIs_i5_A_tESt_PasSw0Rd); once logged in, behave like a real operator responsible for security by monitoring camera feeds, reviewing alerts and logs, and navigating the interface attentively and naturally; you’ve been instructed to create a new user (username: testuser6, password: Test1234 — increment the number if needed, but stay logged in as admin); approach the task with a cautious, observant personality, explore the Console, Logs, and Montage views like you’re on duty, and ensure the session lasts around 2 minutes before logging out.
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'visit', 'url': 'http://40.118.57.244/zm/', 'creates_session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'input#inputUsername', 'text': 'admin', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '2'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'input#inputPassword', 'text': 'thIs_i5_A_tESt_PasSw0Rd', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '2'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'div#loginform > button.btn:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getLogHTML > a:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getConsoleHTML > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '8'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getMontageHTML > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '7'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '7'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getOptionsHTML > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'nav#sidebar > ul.nav:nth-of-type(1) > li.nav-item:nth-of-type(17) > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'a#logoutButton', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '2'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant: ```yaml
+commands:
+  # open page
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_operator_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  - type: sleep
+    seconds: 4
+
+  # login as admin
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 2
+
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 4
+
+  # Explore: check Log tab (as a security operator reviewing alerts and system status)
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 6
+
+  # Spend time reviewing logs attentively
+  - type: sleep
+    seconds: 6
+
+  # Return to Console to overview all monitors and system state
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 8
+
+  # Go to Montage to check camera feeds simultaneously
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 7
+
+  # Watch for motion/alerts as a cautious operator
+  - type: sleep
+    seconds: 7
+
+  # Open Options > Users to check and manage users
+  - type: browser
+    cmd: click
+    selector: "li#getOptionsHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 5
+
+  - type: browser
+    cmd: click
+    selector: "nav#sidebar > ul.nav:nth-of-type(1) > li.nav-item:nth-of-type(17) > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 4
+
+  # (Pause to review user list and check user added, behaving attentively)
+  - type: sleep
+    seconds: 4
+
+  # End of shift: log out
+  - type: browser
+    cmd: click
+    selector: "a#logoutButton"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 2

@@ -1,0 +1,234 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 30
+  - type: sleep
+    seconds: 20
+  - type: sleep
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  # Start the recording here
+  - type: sleep
+    seconds: 1
+
+  # Type in the username (0:01)
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # Type in the password (0:02)
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # press login button (0:05)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on admin (0:26)
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on x (0:29)
+  - type: browser
+    cmd: click
+    selector: "#modalLogout > div > div > div.modal-header > button > span"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click on console (0:37)
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # # click on options (0:39)
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on options (0:28)
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click users (0:42)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(17) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click add new user (0:45)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # fill in username for new user (0:49)
+  - type: browser
+    cmd: type
+    text: "newuser"
+    selector: "input[name='newUser\\[Username\\]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 18
+
+  # fill in password for new user (1:07)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='newUser\\[Password\\]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # fill in confirm password for new user (1:09)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='conf_password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # select language (1:10)
+  - type: browser
+    cmd: click
+    selector: "select[name='newUser[Language]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+#  - type: browser
+#    cmd: click
+#    selector: "option[value='ba_ba']"
+#    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # save new user (1:19)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 13
+
+  # click on console (1:32)
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on Monitor 1 thumbnail (1:34)
+  - type: browser
+    cmd: click
+    selector: "#thumbnail1"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 13
+
+  # click on console (1:47)
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click mocord (1:50)
+  - type: browser
+    cmd: click
+    selector: "#functionLnk-4"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 12
+
+  # click on save (2:02)
+  - type: browser
+    cmd: click
+    selector: "#function_form > div.modal-footer > button.funcSaveBtn.btn.btn-primary"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on localhost (2:04)
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-4 > td.colSource > a > span"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click on cancel (2:12)
+  - type: browser
+    cmd: click
+    selector: "#cancelBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4

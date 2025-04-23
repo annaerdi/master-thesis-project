@@ -1,0 +1,96 @@
+
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: cas_session
+
+  - type: sleep
+    seconds: 4
+
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  - type: browser
+    cmd: click
+    selector: "li#getConsoleHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  - type: sleep
+    seconds: 7
+
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  - type: sleep
+    seconds: 6
+
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  - type: browser
+    cmd: click
+    selector: "li#getGroupsHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  - type: browser
+    cmd: type
+    selector: "table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "testuser6"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  - type: browser
+    cmd: type
+    selector: "table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(2) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "cas_session"

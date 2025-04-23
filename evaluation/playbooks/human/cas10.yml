@@ -1,0 +1,243 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 30
+
+  # Start the recording here
+  - type: sleep
+    seconds: 4
+
+  # Type in the username (0:07)
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # Type in the password (0:11)
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 1
+
+  # press login button (0:12)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # click on monitor 1 (0:16)
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-1 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click back (0:24)
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on monitor 2 (0:26)
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-2 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 12
+
+  # click on back (0:38)
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on monitor 3 (0:40)
+  - type: browser
+    cmd: click
+    selector: "#monitor_id-4 > td.colName > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 20
+
+  # click on back (1:00)
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 23
+
+  # click on admin (1:23)
+  - type: browser
+    cmd: click
+    selector: "#logoutButton"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  # click on x (1:28)
+  - type: browser
+    cmd: click
+    selector: "#modalLogout > div > div > div.modal-header > button > span"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # click on console (1:36)
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 15
+
+  # click on montage review (1:51)
+  - type: browser
+    cmd: click
+    selector: "#getMontageHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click on groups (1:57)
+  - type: browser
+    cmd: click
+    selector: "#getGroupsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 14
+
+  # click on high (2:09)
+  - type: browser
+    cmd: click
+    selector: "#dropdown_bandwidth"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # click on montage review (2:13)
+  - type: browser
+    cmd: click
+    selector: "#getMontageHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # click on options (2:17)
+  - type: browser
+    cmd: click
+    selector: "#getOptionsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  # click on users (2:22)
+  - type: browser
+    cmd: click
+    selector: "#sidebar > ul > li:nth-child(17) > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click add new user (2:24)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # fill in username for new user (2:32)
+  - type: browser
+    cmd: type
+    text: "testuser123647"
+    selector: "input[name='newUser\\[Username\\]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  # fill in password for new user (2:37)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='newUser\\[Password\\]']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # fill in confirm password for new user (2:43)
+  - type: browser
+    cmd: type
+    text: "anoTH3er_tESt_PasSw0Rd"
+    selector: "input[name='conf_password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # click on save (2:45)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(1)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click on groups (2:48)
+  - type: browser
+    cmd: click
+    selector: "#getGroupsHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 5
+
+  # click on Montage (2:53)
+  - type: browser
+    cmd: click
+    selector: "#getMontageHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 13

@@ -1,0 +1,181 @@
+#Model: gpt-4.1-mini
+#User: You are simulating the behavior of a Central Alarm System (CAS) operator using ZoneMinder; log in to http://40.118.57.244/zm/ with username admin and password thIs_i5_A_tESt_PasSw0Rd, and once logged in, behave like a real operator by focusing on monitoring camera feeds, checking system alerts and logs, and exploring the interface naturally and attentively as if responsible for system awareness and safety; in addition to your monitoring duties, you have been instructed to create a new user in the system with username testuser6 and password Test1234—if testuser6 already exists, increment the number, but do not switch accounts—stay logged in as admin after creating the user; treat this like a real work session by moving between sections like Console, Logs, or Montage, investigating timestamps, and behaving realistically without needing step-by-step instructions, approaching the task with a cautious and observant personality; after completing your duties, log out, and ensure the session lasts around 2 minutes
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'visit', 'url': 'http://40.118.57.244/zm/', 'creates_session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'input#inputUsername', 'text': 'admin', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '3'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'input#inputPassword', 'text': 'thIs_i5_A_tESt_PasSw0Rd', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '3'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'div#loginform > button.btn:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getLogHTML > a:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '7'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getMontageHTML > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'li#getGroupsHTML > a.nav-link:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'div#contentButtons > button:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'button.close', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'div#contentButtons > button:nth-of-type(1)', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '5'})
+#Assistant invoked tool: get_interactive_elements({'session_id': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)', 'text': 'testuser7', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'type', 'selector': 'table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)', 'text': 'Test1234', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '3'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'button#groupModalSaveBtn', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '6'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'browser', 'cmd': 'click', 'selector': 'a#logoutButton', 'session': 'cas_operator_session'})
+#Assistant invoked tool: add_playbook_step({'step_type': 'sleep', 'seconds': '4'})
+#Assistant: ```yaml
+commands:
+  # open ZoneMinder login page
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_operator_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  - type: sleep
+    seconds: 5
+
+  # type username admin
+  - type: browser
+    cmd: type
+    selector: "input#inputUsername"
+    text: "admin"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 3
+
+  # type password for admin
+  - type: browser
+    cmd: type
+    selector: "input#inputPassword"
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click login button
+  - type: browser
+    cmd: click
+    selector: "div#loginform > button.btn:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 5
+
+  # click Log menu to check system alerts/logs
+  - type: browser
+    cmd: click
+    selector: "li#getLogHTML > a:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click Montage menu to see camera feed layout
+  - type: browser
+    cmd: click
+    selector: "li#getMontageHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click Groups menu to manage users
+  - type: browser
+    cmd: click
+    selector: "li#getGroupsHTML > a.nav-link:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 6
+
+  # click NEW to add new user
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 5
+
+  # close possibly open modal (clean start for new user add)
+  - type: browser
+    cmd: click
+    selector: "button.close"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 4
+
+  # click NEW button again to add new user
+  - type: browser
+    cmd: click
+    selector: "div#contentButtons > button:nth-of-type(1)"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 5
+
+  # type username testuser7 (increment from testuser6 as already existing)
+  - type: browser
+    cmd: type
+    selector: "table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "testuser7"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 4
+
+  # type password for testuser7
+  - type: browser
+    cmd: type
+    selector: "table#groupModalTable > tbody:nth-of-type(1) > tr:nth-of-type(1) > td:nth-of-type(1) > input:nth-of-type(1)"
+    text: "Test1234"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 3
+
+  # save new user info
+  - type: browser
+    cmd: click
+    selector: "button#groupModalSaveBtn"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 6
+
+  # logout from admin account
+  - type: browser
+    cmd: click
+    selector: "a#logoutButton"
+    session: "cas_operator_session"
+
+  - type: sleep
+    seconds: 4
+
