@@ -209,7 +209,7 @@ def run_full_turn(system_message, tools, messages):
 
         # === 1. Get openai completion ===
         response = client.chat.completions.create(
-            model="o4-mini",
+            model="gpt-4.1",
             messages=[{"role": "system", "content": system_message}] + messages,
             tools=tool_schemas,
         )
@@ -249,10 +249,12 @@ def main():
             messages.append({"role": "user", "content": user_input})
             new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
             messages.extend(new_messages)
-            #print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
         except KeyboardInterrupt:
             print("\nExiting...")
             break
+        finally:
+            print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
+
 
 if __name__ == "__main__":
     main()
