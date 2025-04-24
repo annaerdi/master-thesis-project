@@ -6,7 +6,13 @@ commands:
 
   # Time to prepare the recording
   - type: sleep
-    seconds: 30
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
 
   # Start the recording here
   - type: sleep

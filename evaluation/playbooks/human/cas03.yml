@@ -1,0 +1,174 @@
+commands:
+  - type: browser
+    cmd: visit
+    url: "http://40.118.57.244/zm/"
+    creates_session: "cas_session"
+
+  # Time to prepare the recording
+  - type: sleep
+    seconds: 10
+  - type: sleep
+    seconds: 3
+  - type: sleep
+    seconds: 2
+  - type: debug
+    cmd: "Start recording"
+
+  # Start the recording here
+  - type: sleep
+    seconds: 1
+
+  # Type in the username (0:01)
+  - type: browser
+    cmd: type
+    text: "admin"
+    selector: "input[name='username']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # Type in the password (0:02)
+  - type: browser
+    cmd: type
+    text: "thIs_i5_A_tESt_PasSw0Rd"
+    selector: "input[name='password']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # press login button (0:07)
+  - type: browser
+    cmd: click
+    selector: "button[type='submit']"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 16
+
+  # click on add (0:23)
+  - type: browser
+    cmd: click
+    selector: "body > form > div.container-fluid.pt-2 > button:nth-child(2)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 9
+
+  # type in te notes (0:32)
+  - type: browser
+    cmd: type
+    selector: "#pills-general > table > tbody > tr.Notes > td:nth-child(2) > textarea"
+    text: "new monitor"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 12
+
+  # click on save (0:44)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(2)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 6
+
+  # # click on source (0:50)
+  - type: browser
+    cmd: click
+    selector: "#source-tab"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # add source (0:58)
+  - type: browser
+    cmd: type
+    selector: "#pills-source > table > tbody > tr.SourcePath > td:nth-child(2) > input[type=text]"
+    text: "rtsp://videoserver:vs_password"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
+
+  # type test (1:06)
+  - type: browser
+    cmd: type
+    selector: "#pills-source > table > tbody > tr.SourceOptions > td:nth-child(2) > input[type=text]"
+    text: "test"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 3
+
+  # click save (1:19)
+  - type: browser
+    cmd: click
+    selector: "#contentButtons > button:nth-child(2)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 4
+
+  # set width and height
+  - type: browser
+    cmd: type
+    text: "1"
+    selector: "#pills-source > table > tbody > tr:nth-child(8) > td:nth-child(2) > input[type=number]:nth-child(1)"
+    session: "cas_session"
+  - type: browser
+    cmd: type
+    text: "3"
+    selector: "#pills-source > table > tbody > tr:nth-child(8) > td:nth-child(2) > input[type=number]:nth-child(2)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 16
+
+  # save (1:37)
+  - type: browser
+    cmd: click
+    selector : 'button[data-on-click="validateForm"]'
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 2
+
+  # console
+  - type: browser
+    cmd: click
+    selector: "#getConsoleHTML > a"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 10
+
+  # click monitor 3 (1:47)
+  - type: browser
+    cmd: click
+    selector: "#thumbnail4"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 11
+
+  # click back (1:58)
+  - type: browser
+    cmd: click
+    selector: "#backBtn"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 9
+
+  # click add (2:07)
+  - type: browser
+    cmd: click
+    selector: "body > form > div.container-fluid.pt-2 > button:nth-child(2)"
+    session: "cas_session"
+
+  - type: sleep
+    seconds: 8
