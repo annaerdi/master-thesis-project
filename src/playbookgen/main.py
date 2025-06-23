@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 import yaml
+import argparse
+import os
+import re
 
 
 load_dotenv()
@@ -68,6 +71,26 @@ class PlaybookState:
 
 # Global “playbook” so we can accumulate steps:
 playbook_state = PlaybookState()
+
+
+def extract_yaml_from_messages(messages) -> Optional[str]:
+    """Return the last YAML code block found in assistant messages."""
+    pattern = re.compile(r"```yaml\n(.*?)```", re.DOTALL)
+    for msg in reversed(messages):
+        if msg.get("role") == "assistant" and msg.get("content"):
+            match = pattern.search(msg["content"])
+            if match:
+                return match.group(1).strip()
+    return None
+
+
+def write_playbook_to_file(yaml_text: str, path: str) -> None:
+    """Write provided YAML text to the given file path, creating directories."""
+    directory = os.path.dirname(path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(path, "w") as f:
+        f.write(yaml_text)
 
 
 def add_playbook_step(
@@ -238,7 +261,7 @@ def run_full_turn(system_message, tools, messages):
     return messages[num_init_messages:]
 
 
-def main():
+def main(output_file: Optional[str] = None):
     messages = []
     while True:
         try:
@@ -255,6 +278,23 @@ def main():
         finally:
             print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
 
+    # After exiting the loop, optionally write the playbook to file
+    if output_file:
+        yaml_text = extract_yaml_from_messages(messages)
+        if yaml_text is None:
+            yaml_text = playbook_state.to_yaml()
+        write_playbook_to_file(yaml_text, output_file)
+        print(f"Playbook written to {output_file}")
+
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="PlaybookGen interactive tool")
+    parser.add_argument(
+        "--output-playbook",
+        "-o",
+        type=str,
+        default=None,
+        help="Optional path to write the generated playbook YAML",
+    )
+    args = parser.parse_args()
+    main(output_file=args.output_playbook)
