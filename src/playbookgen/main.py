@@ -1,5 +1,6 @@
 from playbookgen.utils.schema import function_to_schema
 from playbookgen.utils.browser_helpers import build_naive_css_selector
+from playbookgen.utils.yaml_writer import extract_yaml_from_messages, write_playbook_to_file
 from playbookgen.system_message import SYSTEM_MESSAGE
 from playwright.sync_api import sync_playwright, Page, ElementHandle
 from typing import Optional
@@ -7,6 +8,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 import yaml
+import argparse
 
 
 load_dotenv()
@@ -201,6 +203,7 @@ def run_full_turn(system_message, tools, messages):
     """
     num_init_messages = len(messages)
     messages = messages.copy()
+    yml_msg = None  # This will hold the YAML message from the assistant
 
     while True:
         # Convert python functions into JSON schemas
@@ -218,7 +221,8 @@ def run_full_turn(system_message, tools, messages):
         messages.append(message)
 
         if message.content:  # The "assistant" response to print for the user
-            print("Assistant:", message.content)
+            yml_msg = message.content
+            print("Assistant:", yml_msg)
 
         if not message.tool_calls:
             # If there are no tool calls, we assume the conversation step is over
@@ -235,10 +239,10 @@ def run_full_turn(system_message, tools, messages):
             }
             messages.append(result_message)
 
-    return messages[num_init_messages:]
+    return messages[num_init_messages:], yml_msg
 
 
-def main():
+def main(output_file: Optional[str] = None):
     messages = []
     while True:
         try:
@@ -247,7 +251,7 @@ def main():
                 print("Exiting...")
                 break
             messages.append({"role": "user", "content": user_input})
-            new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
+            new_messages, yml_msg = run_full_turn(SYSTEM_MESSAGE, tools, messages)
             messages.extend(new_messages)
         except KeyboardInterrupt:
             print("\nExiting...")
@@ -255,6 +259,23 @@ def main():
         finally:
             print("Current Attackmate Playbook:\n", playbook_state.to_yaml())
 
+    # After exiting the loop, optionally write the playbook to file
+    if output_file:
+        yaml_text = extract_yaml_from_messages(yml_msg)
+        if yaml_text is None:
+            yaml_text = playbook_state.to_yaml()
+        write_playbook_to_file(yaml_text, output_file)
+        print(f"Playbook written to {output_file}")
+
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="PlaybookGen interactive tool")
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=str,
+        default=None,
+        help="Optional path to write the generated playbook YAML",
+    )
+    args = parser.parse_args()
+    main(output_file=args.output)
