@@ -1,5 +1,6 @@
 from playbookgen.utils.schema import function_to_schema
 from playbookgen.utils.browser_helpers import build_naive_css_selector
+from playbookgen.utils.yaml_writer import extract_yaml_from_messages, write_playbook_to_file
 from playbookgen.system_message import SYSTEM_MESSAGE
 from playwright.sync_api import sync_playwright, Page, ElementHandle
 from typing import Optional
@@ -8,8 +9,6 @@ from openai import OpenAI
 import json
 import yaml
 import argparse
-import os
-import re
 
 
 load_dotenv()
@@ -71,26 +70,6 @@ class PlaybookState:
 
 # Global “playbook” so we can accumulate steps:
 playbook_state = PlaybookState()
-
-
-def extract_yaml_from_messages(messages) -> Optional[str]:
-    """Return the last YAML code block found in assistant messages."""
-    pattern = re.compile(r"```yaml\n(.*?)```", re.DOTALL)
-    for msg in reversed(messages):
-        if msg.get("role") == "assistant" and msg.get("content"):
-            match = pattern.search(msg["content"])
-            if match:
-                return match.group(1).strip()
-    return None
-
-
-def write_playbook_to_file(yaml_text: str, path: str) -> None:
-    """Write provided YAML text to the given file path, creating directories."""
-    directory = os.path.dirname(path)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
-    with open(path, "w") as f:
-        f.write(yaml_text)
 
 
 def add_playbook_step(
@@ -224,6 +203,7 @@ def run_full_turn(system_message, tools, messages):
     """
     num_init_messages = len(messages)
     messages = messages.copy()
+    yml_msg = None  # This will hold the YAML message from the assistant
 
     while True:
         # Convert python functions into JSON schemas
@@ -241,7 +221,8 @@ def run_full_turn(system_message, tools, messages):
         messages.append(message)
 
         if message.content:  # The "assistant" response to print for the user
-            print("Assistant:", message.content)
+            yml_msg = message.content
+            print("Assistant:", yml_msg)
 
         if not message.tool_calls:
             # If there are no tool calls, we assume the conversation step is over
@@ -258,7 +239,7 @@ def run_full_turn(system_message, tools, messages):
             }
             messages.append(result_message)
 
-    return messages[num_init_messages:]
+    return messages[num_init_messages:], yml_msg
 
 
 def main(output_file: Optional[str] = None):
@@ -270,7 +251,7 @@ def main(output_file: Optional[str] = None):
                 print("Exiting...")
                 break
             messages.append({"role": "user", "content": user_input})
-            new_messages = run_full_turn(SYSTEM_MESSAGE, tools, messages)
+            new_messages, yml_msg = run_full_turn(SYSTEM_MESSAGE, tools, messages)
             messages.extend(new_messages)
         except KeyboardInterrupt:
             print("\nExiting...")
@@ -280,7 +261,7 @@ def main(output_file: Optional[str] = None):
 
     # After exiting the loop, optionally write the playbook to file
     if output_file:
-        yaml_text = extract_yaml_from_messages(messages)
+        yaml_text = extract_yaml_from_messages(yml_msg)
         if yaml_text is None:
             yaml_text = playbook_state.to_yaml()
         write_playbook_to_file(yaml_text, output_file)
@@ -290,11 +271,11 @@ def main(output_file: Optional[str] = None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="PlaybookGen interactive tool")
     parser.add_argument(
-        "--output-playbook",
+        "--output",
         "-o",
         type=str,
         default=None,
         help="Optional path to write the generated playbook YAML",
     )
     args = parser.parse_args()
-    main(output_file=args.output_playbook)
+    main(output_file=args.output)

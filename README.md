@@ -43,9 +43,9 @@ To run the PlaybookGen CLI tool:
 
 ```bash
 cd src/playbookgen
-python main.py [--output-yaml path/to/playbook.yml]
+python main.py [--output path/to/playbook.yml]
 ```
-Use the optional `--output-yaml` or `-o` argument to automatically save the
+Use the optional `--output` or `-o` argument to automatically save the
 generated YAML playbook to the provided file path.
 
 ### Troubleshooting
